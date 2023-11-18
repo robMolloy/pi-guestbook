@@ -12,7 +12,7 @@ This will be hosted by the raspberry pi. Then using any tablet or similar device
 
 ## Remote web server
 
-Similar to the local web server, but this will allow guests to upload there own photos and use a cropping tool to force the user to upload images of the correct aspect ratio. Images will be uploaded to an s3-equivalent and on success a db entry will be created (which allows for a listener)
+Similar to the local web server, but this will allow guests to upload there own photos and use a cropping tool to force the user to upload images of the correct aspect ratio. Images will be uploaded to an S3-equivalent and on success a db entry will be created (which allows for a listener)
 
 ## Db listener
 
