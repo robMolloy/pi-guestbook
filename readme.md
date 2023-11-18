@@ -1,6 +1,6 @@
 # Pi Guestbook
 
-An open-source solution to photobooth/guestbook for events & parties. It will be made of multiple services
+An open-source solution to photobooth/guestbook for events & parties, made up of multiple services
 
 ## Watch directory and print
 
