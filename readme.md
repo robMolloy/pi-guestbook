@@ -1,6 +1,6 @@
 # Pi Guestbook
 
-An open-source solution to photobooth/guestbook for events & parties, made up of multiple services
+An open-source solution to photobooth/guestbook for events & parties, made up of multiple services, built for a raspberry pi but should work on anything that can use linux print `lpr` command
 
 ## Watch directory and print
 
