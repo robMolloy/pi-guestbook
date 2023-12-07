@@ -4,7 +4,7 @@ An open-source solution to photobooth/guestbook for events & parties, made up of
 
 ## Watch directory and convert to PDF
 
-A listener on the directory which on the new-image event converts the image to a PDF
+A listener on the directory which on the new-image event converts the image to a PDF then moves it to a new directory
 
 ## Watch directory and print (do later / done already on rpi)
 
