@@ -2,9 +2,13 @@
 
 An open-source solution to photobooth/guestbook for events & parties, made up of multiple services, built for a raspberry pi but should work on anything that can use linux print `lpr` command
 
-## Watch directory and print
+## Watch directory and convert to PDF
 
-A listener on the directory which on the new-file event converts the image to a PDF then prints
+A listener on the directory which on the new-image event converts the image to a PDF
+
+## Watch directory and print (do later / done already on rpi)
+
+A listener on the directory which on the new-pdf events prints the new file
 
 ## Local web server
 
