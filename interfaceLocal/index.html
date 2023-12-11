@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      canvas,
+      video {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .canvases > * {
+        background-color: #eee;
+      }
+    </style>
+    <!-- 
+      Questions for silad
+      - do you use snnippets?
+      - stream etc... function names
+     -->
+  </head>
+  <body>
+    <br />
+
+    <section class="headings-section">
+      <div style="text-align: center">
+        <span>
+          <h1>Tap anywhere to begin</h1>
+          <p>
+            Once you tap a countdown will start, then 4 photos will be taken
+          </p>
+        </span>
+      </div>
+    </section>
+
+    <br />
+
+    <section class="stream-section">
+      <div style="display: flex; justify-content: center">
+        <div
+          class="stream-container"
+          style="width: 88vw; max-width: 700px; background-color: gray"
+        >
+          <video
+            id="show-livestream"
+            style="transform: scaleX(-1); width: 100%; height: 100%"
+            autoplay
+          ></video>
+        </div>
+      </div>
+    </section>
+
+    <br />
+    <br />
+
+    <section class="canvases-section">
+      <div
+        class="canvases"
+        style="
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-gap: 20px;
+          max-width: 100vw;
+          padding: 0 20px;
+        "
+      >
+        <span>
+          <canvas id="canvas-1"></canvas>
+        </span>
+        <span>
+          <canvas id="canvas-2"></canvas>
+        </span>
+        <span>
+          <canvas id="canvas-3"></canvas>
+        </span>
+        <span>
+          <canvas id="canvas-4"></canvas>
+        </span>
+      </div>
+    </section>
+
+    <script>
+      const showLiveStreamElm = document.getElementById("show-livestream");
+      const canvases = [
+        document.getElementById("canvas-1"),
+        document.getElementById("canvas-2"),
+        document.getElementById("canvas-3"),
+        document.getElementById("canvas-4"),
+      ];
+      const startWebcamElm = document.getElementById("startWebcam");
+      const snapElm = document.getElementById("snap");
+
+      const delay = async (x) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(true);
+          }, x);
+        });
+      };
+
+      const getStreamDetails = async () => {
+        let streamData;
+        try {
+          streamData = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+              width: { min: 1024, ideal: 1280, max: 1920 },
+              height: { min: 576, ideal: 720, max: 1080 },
+            },
+          });
+        } catch (e) {
+          console.log(e);
+          window.alert(`Can't connect to webcam right now...`);
+        }
+
+        const settings = streamData
+          .getVideoTracks()
+          .find((x) => !!x)
+          .getSettings();
+
+        return { streamData, width: settings.width, height: settings.height };
+      };
+
+      const setupStream = (streamDetails) => {
+        showLiveStreamElm.width = streamDetails.width;
+        showLiveStreamElm.height = streamDetails.height;
+        showLiveStreamElm.srcObject = streamDetails.streamData;
+      };
+
+      const setupCanvases = (streamDetails) => {
+        for (canvas of canvases) {
+          const context = canvas.getContext("2d");
+          const { width, height } = streamDetails;
+          canvas.width = width;
+          canvas.height = height;
+        }
+      };
+
+      const captureImages = async (streamDetails) => {
+        for (canvas of canvases) {
+          await delay(1000);
+          const context = canvas.getContext("2d");
+          const { width, height } = streamDetails;
+
+          context.scale(-1, 1);
+          context.drawImage(showLiveStreamElm, -width, 0, width, height);
+          context.setTransform(1, 0, 0, 1, 0, 0);
+        }
+      };
+
+      const init = async () => {
+        const streamDetails = await getStreamDetails();
+
+        setupStream(streamDetails);
+        setupCanvases(streamDetails);
+
+        document.body.addEventListener("click", () =>
+          captureImages(streamDetails)
+        );
+      };
+
+      init();
+    </script>
+  </body>
+</html>
