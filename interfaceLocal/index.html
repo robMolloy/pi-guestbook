@@ -30,11 +30,6 @@
         display: none;
       }
     </style>
-    <!-- 
-      Questions for silad
-      - do you use snnippets?
-      - stream etc... function names
-     -->
   </head>
   <body>
     <section id="display-status-section">
@@ -113,7 +108,7 @@
       <div style="text-align: center">
         <span>
           <button>Print photo</button>
-          <button>Start again</button>
+          <button onclick="init()">Start again</button>
         </span>
       </div>
     </section>
@@ -313,11 +308,13 @@
         const { width: newWidth, height: newHeight } = newCanvas;
         newContext.drawImage(oldCanvas, 0, 0, newWidth, newHeight);
       };
-      const addSelectImageEvents = (newCanvas, oldCanvas) => {
+      const addSelectImageEvents = (initOnSelectImage) => {
+        const onSelectImage = initOnSelectImage ? initOnSelectImage : () => {};
+
         for (const captureCanvas of captureCanvases) {
           captureCanvas.addEventListener("click", () => {
             handleSelectImage(selectedImageCanvas, captureCanvas);
-            setStatus("SELECTED");
+            onSelectImage();
           });
         }
       };
@@ -348,7 +345,7 @@
             setStatus("CAPTURING");
             await captureImages(streamDetails);
             setStatus("UNSELECTED");
-            addSelectImageEvents();
+            addSelectImageEvents(() => setStatus("SELECTED"));
           }
         });
 
@@ -356,37 +353,6 @@
       };
 
       init();
-
-      /*
-      const captureEvent = async (streamDetails) => {
-        removeCaptureEvent();
-        setStatus("CAPTURING");
-        await captureImages(streamDetails);
-        setStatus("UNSELECTED");
-      };
-      const removeCaptureEvent = () => {
-        document.body.removeEventListener("click", captureEvent);
-      };
-      const addCaptureEvent = () => {
-        const rtn = document.body.addEventListener("click", captureEvent);
-      };
-
-      const init = async () => {
-        setStatus("INITIALIZING");
-
-        const streamDetails = await getStreamDetails();
-
-        setupStream(streamDetails);
-        setupCaptureCanvases(streamDetails);
-        setupSelectedImageCanvas(streamDetails);
-
-        addCaptureEvent(streamDetails);
-
-        setStatus("READY");
-      };
-
-      init();
-      */
     </script>
   </body>
 </html>
