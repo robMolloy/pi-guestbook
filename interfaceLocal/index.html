@@ -17,8 +17,17 @@
         width: 100%;
         height: 100%;
       }
+
+      section {
+        margin: 15px;
+      }
+
       .canvases > * {
         background-color: #eee;
+      }
+
+      .hidden {
+        display: none;
       }
     </style>
     <!-- 
@@ -28,22 +37,32 @@
      -->
   </head>
   <body>
-    <br />
+    <section id="display-status-section">
+      <button onclick="init()">init</button>
+      <span id="display-status"></span>
+    </section>
 
-    <section class="headings-section">
+    <section id="start-instructions-section">
       <div style="text-align: center">
         <span>
-          <h1>Tap anywhere to begin</h1>
-          <p>
+          <h1>
             Once you tap a countdown will start, then 4 photos will be taken
-          </p>
+          </h1>
+          <p>Tap anywhere to begin</p>
         </span>
       </div>
     </section>
 
-    <br />
+    <section id="capturing-instructions-section">
+      <div style="text-align: center">
+        <span>
+          <h1>Your countdown has begun</h1>
+          <p>Strike a pose</p>
+        </span>
+      </div>
+    </section>
 
-    <section class="stream-section">
+    <section id="stream-section">
       <div style="display: flex; justify-content: center">
         <div
           class="stream-container"
@@ -58,10 +77,48 @@
       </div>
     </section>
 
-    <br />
-    <br />
+    <section id="image-selection-instructions-section">
+      <div style="text-align: center">
+        <span>
+          <h1>Tap the picture you want to print</h1>
+          <p>If you don't like any of them just tap start again</p>
+        </span>
+      </div>
+    </section>
 
-    <section class="canvases-section">
+    <section id="image-selected-section">
+      <div style="display: flex; justify-content: center; position: relative">
+        <div
+          class="selected-image-container"
+          style="
+            width: 88vw;
+            max-width: 700px;
+            background-color: gray;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <div style="position: absolute; color: white">
+            <h1>Select your favourite photo</h1>
+          </div>
+          <div style="z-index: 1">
+            <canvas id="selected-image-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="confirm-image-section">
+      <div style="text-align: center">
+        <span>
+          <button>Print photo</button>
+          <button>Start again</button>
+        </span>
+      </div>
+    </section>
+
+    <section id="captured-images-section">
       <div
         class="canvases"
         style="
@@ -87,9 +144,46 @@
       </div>
     </section>
 
+    <section id="qr-section">
+      <div style="text-align: center">
+        <h1>Or scan the qr code to print your own photo</h1>
+        <br />
+        <img src="./assets/qr-code.png" />
+      </div>
+    </section>
+
     <script>
+      let status = "PENDING_INITIALIZATION";
+      let isRapid = false;
+
+      const startInstructionsSection = document.getElementById(
+        "start-instructions-section"
+      );
+      const capturingInstructionsSection = document.getElementById(
+        "capturing-instructions-section"
+      );
+      const streamSection = document.getElementById("stream-section");
+      const imageSelectionInstructionsSection = document.getElementById(
+        "image-selection-instructions-section"
+      );
+      const imageSelectedSection = document.getElementById(
+        "image-selected-section"
+      );
+      const confirmImageSection = document.getElementById(
+        "confirm-image-section"
+      );
+      const capturedImagesSection = document.getElementById(
+        "captured-images-section"
+      );
+      const qrSection = document.getElementById("qr-section");
+
+      const displayStatusElm = document.getElementById("display-status");
       const showLiveStreamElm = document.getElementById("show-livestream");
-      const canvases = [
+      const selectedImageCanvas = document.getElementById(
+        "selected-image-canvas"
+      );
+
+      const captureCanvases = [
         document.getElementById("canvas-1"),
         document.getElementById("canvas-2"),
         document.getElementById("canvas-3"),
@@ -98,11 +192,70 @@
       const startWebcamElm = document.getElementById("startWebcam");
       const snapElm = document.getElementById("snap");
 
+      const hide = (elm) => elm.classList.add("hidden");
+      const show = (elm) => elm.classList.remove("hidden");
+
+      const setStatus = (x) => {
+        status = x;
+        displayStatusElm.innerHTML = `Status: "${status}"`;
+        if (status === "PENDING_INITIALIZATION") {
+        }
+        if (status === "INITIALIZING") {
+          show(startInstructionsSection);
+          hide(capturingInstructionsSection);
+          show(streamSection);
+          hide(imageSelectionInstructionsSection);
+          hide(imageSelectedSection);
+          hide(confirmImageSection);
+          hide(capturedImagesSection);
+          show(qrSection);
+        }
+        if (status === "READY") {
+          show(startInstructionsSection);
+          hide(capturingInstructionsSection);
+          show(streamSection);
+          hide(imageSelectionInstructionsSection);
+          hide(imageSelectedSection);
+          hide(confirmImageSection);
+          hide(capturedImagesSection);
+          show(qrSection);
+        }
+        if (status === "CAPTURING") {
+          hide(startInstructionsSection);
+          show(capturingInstructionsSection);
+          show(streamSection);
+          hide(imageSelectionInstructionsSection);
+          hide(imageSelectedSection);
+          hide(confirmImageSection);
+          show(capturedImagesSection);
+          hide(qrSection);
+        }
+        if (status === "UNSELECTED") {
+          hide(startInstructionsSection);
+          hide(capturingInstructionsSection);
+          hide(streamSection);
+          show(imageSelectionInstructionsSection);
+          show(imageSelectedSection);
+          show(confirmImageSection);
+          show(capturedImagesSection);
+          hide(qrSection);
+        }
+        if (status === "SELECTED") {
+          hide(startInstructionsSection);
+          hide(capturingInstructionsSection);
+          hide(streamSection);
+          show(imageSelectionInstructionsSection);
+          show(imageSelectedSection);
+          show(confirmImageSection);
+          show(capturedImagesSection);
+          hide(qrSection);
+        }
+      };
+
       const delay = async (x) => {
         return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(true);
-          }, x);
+          const t = isRapid ? 1 : x;
+          setTimeout(() => resolve(true), t);
         });
       };
 
@@ -126,48 +279,114 @@
           .find((x) => !!x)
           .getSettings();
 
-        return { streamData, width: settings.width, height: settings.height };
+        return {
+          data: streamData,
+          width: settings.width,
+          height: settings.height,
+        };
       };
 
       const setupStream = (streamDetails) => {
         showLiveStreamElm.width = streamDetails.width;
         showLiveStreamElm.height = streamDetails.height;
-        showLiveStreamElm.srcObject = streamDetails.streamData;
+        showLiveStreamElm.srcObject = streamDetails.data;
       };
 
-      const setupCanvases = (streamDetails) => {
-        for (canvas of canvases) {
+      const setupCaptureCanvases = (streamDetails) => {
+        for (canvas of captureCanvases) {
           const context = canvas.getContext("2d");
           const { width, height } = streamDetails;
           canvas.width = width;
           canvas.height = height;
         }
       };
+      const setupSelectedImageCanvas = (streamDetails) => {
+        const context = selectedImageCanvas.getContext("2d");
+        const { width, height } = streamDetails;
+        selectedImageCanvas.width = width;
+        selectedImageCanvas.height = height;
+      };
+
+      const handleSelectImage = (newCanvas, oldCanvas) => {
+        var newContext = newCanvas.getContext("2d");
+
+        const { width: newWidth, height: newHeight } = newCanvas;
+        newContext.drawImage(oldCanvas, 0, 0, newWidth, newHeight);
+      };
+      const addSelectImageEvents = (newCanvas, oldCanvas) => {
+        for (const captureCanvas of captureCanvases) {
+          captureCanvas.addEventListener("click", () => {
+            handleSelectImage(selectedImageCanvas, captureCanvas);
+            setStatus("SELECTED");
+          });
+        }
+      };
 
       const captureImages = async (streamDetails) => {
-        for (canvas of canvases) {
+        for (const captureCanvas of captureCanvases) {
           await delay(1000);
-          const context = canvas.getContext("2d");
+          const canvasContext = captureCanvas.getContext("2d");
           const { width, height } = streamDetails;
 
-          context.scale(-1, 1);
-          context.drawImage(showLiveStreamElm, -width, 0, width, height);
-          context.setTransform(1, 0, 0, 1, 0, 0);
+          canvasContext.scale(-1, 1);
+          canvasContext.drawImage(showLiveStreamElm, -width, 0, width, height);
+          canvasContext.setTransform(1, 0, 0, 1, 0, 0);
         }
       };
 
       const init = async () => {
+        setStatus("INITIALIZING");
+
         const streamDetails = await getStreamDetails();
 
         setupStream(streamDetails);
-        setupCanvases(streamDetails);
+        setupCaptureCanvases(streamDetails);
+        setupSelectedImageCanvas(streamDetails);
 
-        document.body.addEventListener("click", () =>
-          captureImages(streamDetails)
-        );
+        document.body.addEventListener("click", async () => {
+          if (status === "READY") {
+            setStatus("CAPTURING");
+            await captureImages(streamDetails);
+            setStatus("UNSELECTED");
+            addSelectImageEvents();
+          }
+        });
+
+        setStatus("READY");
       };
 
       init();
+
+      /*
+      const captureEvent = async (streamDetails) => {
+        removeCaptureEvent();
+        setStatus("CAPTURING");
+        await captureImages(streamDetails);
+        setStatus("UNSELECTED");
+      };
+      const removeCaptureEvent = () => {
+        document.body.removeEventListener("click", captureEvent);
+      };
+      const addCaptureEvent = () => {
+        const rtn = document.body.addEventListener("click", captureEvent);
+      };
+
+      const init = async () => {
+        setStatus("INITIALIZING");
+
+        const streamDetails = await getStreamDetails();
+
+        setupStream(streamDetails);
+        setupCaptureCanvases(streamDetails);
+        setupSelectedImageCanvas(streamDetails);
+
+        addCaptureEvent(streamDetails);
+
+        setStatus("READY");
+      };
+
+      init();
+      */
     </script>
   </body>
 </html>
