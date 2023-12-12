@@ -49,8 +49,29 @@
         background-color: #eee;
       }
 
+      #flash {
+        width: 100px;
+        height: 100px;
+        background-color: white;
+        opacity: 0;
+        transition: opacity 1s;
+      }
+
+      #flash.flash {
+        opacity: 1;
+      }
+
+      @keyframes flashFade {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+
       .hidden {
-        display: none;
+        display: none !important;
       }
     </style>
   </head>
@@ -72,7 +93,7 @@
       >
         <span>
           <h1>Success</h1>
-          <p>Your image is printing</p>
+          <p>Your image has been sent to print, it may take a moment...</p>
           <br />
           <button class="my-button" onclick="init()">Tap to continue</button>
         </span>
@@ -101,10 +122,7 @@
     <section id="start-instructions-section">
       <div style="text-align: center">
         <span>
-          <h1>
-            Once you tap a countdown will start, then 4 photos will be taken
-          </h1>
-          <p>Tap anywhere to begin</p>
+          <h1>Tap anywhere for the countdown to begin</h1>
         </span>
       </div>
     </section>
@@ -112,8 +130,8 @@
     <section id="capturing-instructions-section">
       <div style="text-align: center">
         <span>
-          <h1>Your countdown has begun</h1>
-          <p>Strike a pose</p>
+          <h1>Strike a pose!</h1>
+          <p></p>
         </span>
       </div>
     </section>
@@ -122,8 +140,48 @@
       <div style="display: flex; justify-content: center">
         <div
           class="stream-container"
-          style="width: 88vw; max-width: 700px; background-color: gray"
+          style="
+            width: 88vw;
+            max-width: 700px;
+            background-color: gray;
+            position: relative;
+          "
         >
+          <div
+            style="
+              position: absolute;
+              right: 0;
+              z-index: 1;
+              font-weight: 900;
+              font-size: 2rem;
+              color: white;
+              border: solid 5px white;
+              border-radius: 200px;
+              margin: 10px;
+              height: 60px;
+              width: 60px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background-color: #4caf50;
+            "
+            id="countdown-text"
+            class="hidden"
+          >
+            5
+          </div>
+          <div
+            style="
+              position: absolute;
+              z-index: 1;
+              color: white;
+              height: 100%;
+              width: 100%;
+              background-color: white;
+              opacity: 0;
+            "
+            id="flash"
+          ></div>
           <video
             id="show-livestream"
             style="transform: scaleX(-1); width: 100%; height: 100%"
@@ -136,8 +194,8 @@
     <section id="image-selection-instructions-section">
       <div style="text-align: center">
         <span>
-          <h1>Tap the picture you want to print</h1>
-          <p>If you don't like any of them just tap start again</p>
+          <h1>Select the photo you want to print</h1>
+          <p>If you don't like any of them, just tap "Start again"</p>
         </span>
       </div>
     </section>
@@ -176,7 +234,7 @@
           >
             Print photo
           </button>
-          <button class="my-button fail" onclick="reInit()">Start again</button>
+          <button class="my-button fail" onclick="init()">Start again</button>
         </span>
       </div>
     </section>
@@ -217,7 +275,7 @@
 
     <script>
       let status = "PENDING_INITIALIZATION";
-      let isRapid = true;
+      let isRapid = false;
       let streamDetails;
 
       const successMessageSection = document.getElementById(
@@ -232,7 +290,10 @@
       const capturingInstructionsSection = document.getElementById(
         "capturing-instructions-section"
       );
+      const countdownText = document.getElementById("countdown-text");
       const streamSection = document.getElementById("stream-section");
+      const flashElm = document.getElementById("flash");
+
       const imageSelectionInstructionsSection = document.getElementById(
         "image-selection-instructions-section"
       );
@@ -273,6 +334,7 @@
         }
         if (status === "INITIALIZING") {
           printImageButton.disabled = true;
+          hide(countdownText);
           hide(successMessageSection);
           hide(errorMessageSection);
           show(startInstructionsSection);
@@ -286,6 +348,7 @@
         }
         if (status === "READY") {
           printImageButton.disabled = true;
+          hide(countdownText);
           hide(successMessageSection);
           hide(errorMessageSection);
           show(startInstructionsSection);
@@ -299,6 +362,7 @@
         }
         if (status === "CAPTURING") {
           printImageButton.disabled = true;
+          show(countdownText);
           hide(successMessageSection);
           hide(errorMessageSection);
           hide(startInstructionsSection);
@@ -312,6 +376,7 @@
         }
         if (status === "UNSELECTED") {
           printImageButton.disabled = true;
+          hide(countdownText);
           hide(successMessageSection);
           hide(errorMessageSection);
           hide(startInstructionsSection);
@@ -325,6 +390,7 @@
         }
         if (status === "SELECTED") {
           printImageButton.disabled = false;
+          hide(countdownText);
           hide(successMessageSection);
           hide(errorMessageSection);
           hide(startInstructionsSection);
@@ -351,6 +417,7 @@
         }
         if (status === "FAIL") {
           printImageButton.disabled = true;
+          hide(countdownText);
           hide(successMessageSection);
           show(errorMessageSection);
           hide(startInstructionsSection);
@@ -438,6 +505,19 @@
         }
       };
 
+      const countdown = async (x = 5) => {
+        const nums = Array(x + 1)
+          .fill()
+          .map((y, j) => x - j);
+        for (const num of nums) {
+          countdownText.innerHTML = num;
+          await delay(1000);
+        }
+
+        hide(countdownText);
+        return;
+      };
+
       const sendSelectedImage = async (e) => {
         e.preventDefault();
         try {
@@ -446,8 +526,9 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
           });
-          console.log(await resp.json());
-          setStatus("SUCCESS");
+          const json = await resp.json();
+          if (json.success === true) setStatus("SUCCESS");
+          else setStatus("FAIL");
         } catch (error) {
           console.log(error);
           setStatus("FAIL");
@@ -455,14 +536,34 @@
       };
 
       const captureImages = async () => {
+        await countdown(5);
         for (const captureCanvas of captureCanvases) {
-          await delay(1000);
+          flash();
           const canvasContext = captureCanvas.getContext("2d");
           const { width, height } = streamDetails;
 
           canvasContext.scale(-1, 1);
           canvasContext.drawImage(showLiveStreamElm, -width, 0, width, height);
           canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+          await delay(2000);
+        }
+      };
+      const flash = () => {
+        flashElm.addEventListener(
+          "animationend",
+          function () {
+            flashElm.classList.remove("flash");
+            flashElm.style.animation = "none"; // Resetting the animation to none prevents the fade-out animation from triggering when removing the class
+          },
+          { once: true }
+        );
+        flashElm.classList.toggle("flash");
+
+        if (flashElm.classList.contains("flash")) {
+          flashElm.style.animation = "flashFade 1s";
+        } else {
+          flashElm.style.animation = "none";
+          // Resetting the animation to none prevents the fade-out animation from triggering when removing the class
         }
       };
 
@@ -471,7 +572,6 @@
         setupCaptureCanvases();
         setupSelectedImageCanvas();
 
-        console.log("about to be ready: " + status);
         setStatus("READY");
       };
       const init = async () => {
