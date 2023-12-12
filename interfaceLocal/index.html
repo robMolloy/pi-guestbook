@@ -19,7 +19,30 @@
       }
 
       section {
-        margin: 15px;
+        margin-bottom: 15px;
+      }
+
+      .my-button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        transition-duration: 0.4s;
+        cursor: pointer;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .my-button.fail {
+        background-color: #b84747;
+      }
+      .my-button:disabled {
+        background-color: #aaa;
       }
 
       .canvases > * {
@@ -32,9 +55,47 @@
     </style>
   </head>
   <body>
-    <section id="display-status-section">
-      <button onclick="init()">init</button>
+    <section id="display-status-section" style="display: none">
+      <button onclick="init()">init()</button>
       <span id="display-status"></span>
+    </section>
+
+    <section id="success-message-section">
+      <div
+        style="
+          height: 100vh;
+          display: flex;
+          text-align: center;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <span>
+          <h1>Success</h1>
+          <p>Your image is printing</p>
+          <br />
+          <button class="my-button" onclick="init()">Tap to continue</button>
+        </span>
+      </div>
+    </section>
+    <section id="error-message-section">
+      <div
+        style="
+          height: 100vh;
+          display: flex;
+          text-align: center;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <span>
+          <h1>Error</h1>
+          <p>Something went wrong</p>
+          <button class="my-button fail" onclick="init()">
+            Tap to try again
+          </button>
+        </span>
+      </div>
     </section>
 
     <section id="start-instructions-section">
@@ -107,8 +168,15 @@
     <section id="confirm-image-section">
       <div style="text-align: center">
         <span>
-          <button>Print photo</button>
-          <button onclick="init()">Start again</button>
+          <button
+            id="print-image-button"
+            class="my-button"
+            onclick="sendSelectedImage(event)"
+            disabled
+          >
+            Print photo
+          </button>
+          <button class="my-button fail" onclick="reInit()">Start again</button>
         </span>
       </div>
     </section>
@@ -149,8 +217,15 @@
 
     <script>
       let status = "PENDING_INITIALIZATION";
-      let isRapid = false;
+      let isRapid = true;
+      let streamDetails;
 
+      const successMessageSection = document.getElementById(
+        "success-message-section"
+      );
+      const errorMessageSection = document.getElementById(
+        "error-message-section"
+      );
       const startInstructionsSection = document.getElementById(
         "start-instructions-section"
       );
@@ -171,6 +246,7 @@
         "captured-images-section"
       );
       const qrSection = document.getElementById("qr-section");
+      const printImageButton = document.getElementById("print-image-button");
 
       const displayStatusElm = document.getElementById("display-status");
       const showLiveStreamElm = document.getElementById("show-livestream");
@@ -196,6 +272,9 @@
         if (status === "PENDING_INITIALIZATION") {
         }
         if (status === "INITIALIZING") {
+          printImageButton.disabled = true;
+          hide(successMessageSection);
+          hide(errorMessageSection);
           show(startInstructionsSection);
           hide(capturingInstructionsSection);
           show(streamSection);
@@ -206,6 +285,9 @@
           show(qrSection);
         }
         if (status === "READY") {
+          printImageButton.disabled = true;
+          hide(successMessageSection);
+          hide(errorMessageSection);
           show(startInstructionsSection);
           hide(capturingInstructionsSection);
           show(streamSection);
@@ -216,6 +298,9 @@
           show(qrSection);
         }
         if (status === "CAPTURING") {
+          printImageButton.disabled = true;
+          hide(successMessageSection);
+          hide(errorMessageSection);
           hide(startInstructionsSection);
           show(capturingInstructionsSection);
           show(streamSection);
@@ -226,6 +311,9 @@
           hide(qrSection);
         }
         if (status === "UNSELECTED") {
+          printImageButton.disabled = true;
+          hide(successMessageSection);
+          hide(errorMessageSection);
           hide(startInstructionsSection);
           hide(capturingInstructionsSection);
           hide(streamSection);
@@ -236,6 +324,9 @@
           hide(qrSection);
         }
         if (status === "SELECTED") {
+          printImageButton.disabled = false;
+          hide(successMessageSection);
+          hide(errorMessageSection);
           hide(startInstructionsSection);
           hide(capturingInstructionsSection);
           hide(streamSection);
@@ -243,6 +334,32 @@
           show(imageSelectedSection);
           show(confirmImageSection);
           show(capturedImagesSection);
+          hide(qrSection);
+        }
+        if (status === "SUCCESS") {
+          printImageButton.disabled = true;
+          show(successMessageSection);
+          hide(errorMessageSection);
+          hide(startInstructionsSection);
+          hide(capturingInstructionsSection);
+          hide(streamSection);
+          hide(imageSelectionInstructionsSection);
+          hide(imageSelectedSection);
+          hide(confirmImageSection);
+          hide(capturedImagesSection);
+          hide(qrSection);
+        }
+        if (status === "FAIL") {
+          printImageButton.disabled = true;
+          hide(successMessageSection);
+          show(errorMessageSection);
+          hide(startInstructionsSection);
+          hide(capturingInstructionsSection);
+          hide(streamSection);
+          hide(imageSelectionInstructionsSection);
+          hide(imageSelectedSection);
+          hide(confirmImageSection);
+          hide(capturedImagesSection);
           hide(qrSection);
         }
       };
@@ -255,6 +372,7 @@
       };
 
       const getStreamDetails = async () => {
+        console.log(Math.random());
         let streamData;
         try {
           streamData = await navigator.mediaDevices.getUserMedia({
@@ -281,13 +399,13 @@
         };
       };
 
-      const setupStream = (streamDetails) => {
+      const setupStream = () => {
         showLiveStreamElm.width = streamDetails.width;
         showLiveStreamElm.height = streamDetails.height;
         showLiveStreamElm.srcObject = streamDetails.data;
       };
 
-      const setupCaptureCanvases = (streamDetails) => {
+      const setupCaptureCanvases = () => {
         for (canvas of captureCanvases) {
           const context = canvas.getContext("2d");
           const { width, height } = streamDetails;
@@ -295,7 +413,7 @@
           canvas.height = height;
         }
       };
-      const setupSelectedImageCanvas = (streamDetails) => {
+      const setupSelectedImageCanvas = () => {
         const context = selectedImageCanvas.getContext("2d");
         const { width, height } = streamDetails;
         selectedImageCanvas.width = width;
@@ -314,12 +432,29 @@
         for (const captureCanvas of captureCanvases) {
           captureCanvas.addEventListener("click", () => {
             handleSelectImage(selectedImageCanvas, captureCanvas);
+            printImageButton.disabled = false;
             onSelectImage();
           });
         }
       };
 
-      const captureImages = async (streamDetails) => {
+      const sendSelectedImage = async (e) => {
+        e.preventDefault();
+        try {
+          const resp = await fetch("http://localhost:3000/print-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
+          });
+          console.log(await resp.json());
+          setStatus("SUCCESS");
+        } catch (error) {
+          console.log(error);
+          setStatus("FAIL");
+        }
+      };
+
+      const captureImages = async () => {
         for (const captureCanvas of captureCanvases) {
           await delay(1000);
           const canvasContext = captureCanvas.getContext("2d");
@@ -331,25 +466,28 @@
         }
       };
 
+      const reInit = () => {
+        setupStream();
+        setupCaptureCanvases();
+        setupSelectedImageCanvas();
+
+        console.log("about to be ready: " + status);
+        setStatus("READY");
+      };
       const init = async () => {
         setStatus("INITIALIZING");
 
-        const streamDetails = await getStreamDetails();
+        streamDetails = await getStreamDetails();
 
-        setupStream(streamDetails);
-        setupCaptureCanvases(streamDetails);
-        setupSelectedImageCanvas(streamDetails);
-
-        document.body.addEventListener("click", async () => {
+        window.addEventListener("click", async () => {
           if (status === "READY") {
             setStatus("CAPTURING");
-            await captureImages(streamDetails);
+            await captureImages();
             setStatus("UNSELECTED");
             addSelectImageEvents(() => setStatus("SELECTED"));
           }
         });
-
-        setStatus("READY");
+        reInit();
       };
 
       init();
