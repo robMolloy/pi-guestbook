@@ -55,6 +55,20 @@
         background-color: #aaa;
       }
 
+      .captured-image-number {
+        position: absolute;
+        right: 0;
+        height: 30px;
+        width: 30px;
+        border-radius: 30px;
+        background-color: coral;
+        border: solid 3px white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transform: translate(35%, -35%);
+      }
+
       .canvases > * {
         background-color: #eee;
       }
@@ -151,7 +165,7 @@
       <div style="display: flex; justify-content: center">
         <div
           class="stream-container"
-          style="height: 50vw; width: 50vw; position: relative"
+          style="height: 37vh; width: 37vh; position: relative"
         >
           <div
             style="
@@ -169,7 +183,7 @@
               display: flex;
               align-items: center;
               justify-content: center;
-              background-color: #4caf50;
+              background-color: coral;
             "
             id="countdown-text"
             class="hidden"
@@ -213,8 +227,8 @@
         <div
           class="selected-image-container"
           style="
-            height: 50vw;
-            width: 50vw;
+            height: 37vh;
+            width: 37vh;
             background-color: gray;
             display: flex;
             justify-content: center;
@@ -247,28 +261,34 @@
       </div>
     </section>
 
-    <section id="captured-images-section">
+    <section id="captured-images-section" style="flex: 1">
       <div
         class="canvases"
         style="
+          height: 100%;
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          grid-gap: 20px;
+          grid-template-rows: 1fr 1fr;
+          grid-template-columns: 1fr 1fr;
+          gap: 30px;
           max-width: 100vw;
-          padding: 0 20px;
+          margin: 0 20px;
         "
       >
-        <span>
-          <canvas id="canvas-1"></canvas>
+        <span style="position: relative">
+          <span class="captured-image-number"> 1 </span>
+          <canvas id="canvas-1" style="display: none"></canvas>
         </span>
-        <span>
-          <canvas id="canvas-2"></canvas>
+        <span style="position: relative">
+          <span class="captured-image-number"> 2 </span>
+          <canvas id="canvas-2" style="display: none"></canvas>
         </span>
-        <span>
-          <canvas id="canvas-3"></canvas>
+        <span style="position: relative">
+          <span class="captured-image-number"> 3 </span>
+          <canvas id="canvas-3" style="display: none"></canvas>
         </span>
-        <span>
-          <canvas id="canvas-4"></canvas>
+        <span style="position: relative">
+          <span class="captured-image-number"> 4 </span>
+          <canvas id="canvas-4" style="display: none"></canvas>
         </span>
       </div>
     </section>
@@ -291,8 +311,14 @@
 
     <script>
       let status = "PENDING_INITIALIZATION";
-      let isRapid = true;
+      let isRapid = false;
       let streamDetails;
+
+      const addCanvasImageToElmBackground = (canvas, elm) => {
+        elm.style.backgroundImage = `url('${canvas.toDataURL()}')`;
+        elm.style.backgroundSize = "cover";
+        elm.style.backgroundPosition = "center";
+      };
 
       const successMessageSection = document.getElementById(
         "success-message-section"
@@ -493,6 +519,7 @@
           const { width, height } = streamDetails;
           canvas.width = width;
           canvas.height = height;
+          canvas.parentElement.style.backgroundImage = "";
         }
       };
       const setupSelectedImageCanvas = () => {
@@ -512,7 +539,7 @@
         const onSelectImage = initOnSelectImage ? initOnSelectImage : () => {};
 
         for (const captureCanvas of captureCanvases) {
-          captureCanvas.addEventListener("click", () => {
+          captureCanvas.parentElement.addEventListener("click", () => {
             handleSelectImage(selectedImageCanvas, captureCanvas);
             printImageButton.disabled = false;
             onSelectImage();
@@ -560,6 +587,11 @@
           canvasContext.scale(-1, 1);
           canvasContext.drawImage(showLiveStreamElm, -width, 0, width, height);
           canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+
+          addCanvasImageToElmBackground(
+            captureCanvas,
+            captureCanvas.parentElement
+          );
           await delay(2000);
         }
       };
