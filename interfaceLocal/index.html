@@ -5,10 +5,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto"
+      rel="stylesheet"
+    />
     <style>
       * {
         margin: 0;
         box-sizing: border-box;
+      }
+      body {
+        font-family: "Roboto";
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
 
       canvas,
@@ -84,7 +94,7 @@
     <section id="success-message-section">
       <div
         style="
-          height: 100vh;
+          height: 90vh;
           display: flex;
           text-align: center;
           justify-content: center;
@@ -99,10 +109,11 @@
         </span>
       </div>
     </section>
+
     <section id="error-message-section">
       <div
         style="
-          height: 100vh;
+          height: 90vh;
           display: flex;
           text-align: center;
           justify-content: center;
@@ -140,12 +151,7 @@
       <div style="display: flex; justify-content: center">
         <div
           class="stream-container"
-          style="
-            width: 88vw;
-            max-width: 700px;
-            background-color: gray;
-            position: relative;
-          "
+          style="height: 50vw; width: 50vw; position: relative"
         >
           <div
             style="
@@ -182,11 +188,13 @@
             "
             id="flash"
           ></div>
-          <video
-            id="show-livestream"
-            style="transform: scaleX(-1); width: 100%; height: 100%"
-            autoplay
-          ></video>
+          <span style="background-color: gray">
+            <video
+              id="show-livestream"
+              style="transform: scaleX(-1); width: 100%; height: 100%"
+              autoplay
+            ></video>
+          </span>
         </div>
       </div>
     </section>
@@ -195,7 +203,7 @@
       <div style="text-align: center">
         <span>
           <h1>Select the photo you want to print</h1>
-          <p>If you don't like any of them, just tap "Start again"</p>
+          <p>If you don't like any, just tap "Start again"</p>
         </span>
       </div>
     </section>
@@ -205,8 +213,8 @@
         <div
           class="selected-image-container"
           style="
-            width: 88vw;
-            max-width: 700px;
+            height: 50vw;
+            width: 50vw;
             background-color: gray;
             display: flex;
             justify-content: center;
@@ -265,17 +273,25 @@
       </div>
     </section>
 
-    <section id="qr-section">
+    <section
+      id="qr-section"
+      style="
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
       <div style="text-align: center">
         <h1>Or scan the qr code to print your own photo</h1>
         <br />
-        <img src="./assets/qr-code.png" />
+        <img style="max-height: 170px" src="./assets/qr-code.png" />
       </div>
     </section>
 
     <script>
       let status = "PENDING_INITIALIZATION";
-      let isRapid = false;
+      let isRapid = true;
       let streamDetails;
 
       const successMessageSection = document.getElementById(
@@ -433,20 +449,19 @@
 
       const delay = async (x) => {
         return new Promise((resolve) => {
-          const t = isRapid ? 1 : x;
+          const t = isRapid ? 100 : x;
           setTimeout(() => resolve(true), t);
         });
       };
 
       const getStreamDetails = async () => {
-        console.log(Math.random());
         let streamData;
         try {
           streamData = await navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
-              width: { min: 1024, ideal: 1280, max: 1920 },
-              height: { min: 576, ideal: 720, max: 1080 },
+              width: { min: 576, ideal: 1080, max: 1080 },
+              height: { min: 576, ideal: 1080, max: 1080 },
             },
           });
         } catch (e) {
