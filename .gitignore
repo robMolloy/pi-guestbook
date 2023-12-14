@@ -1,3 +1,5 @@
 node_modules
 files/images/*
 files/pdfs/*
+
+.DS_STORE

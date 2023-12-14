@@ -312,7 +312,7 @@
     <script>
       let selectImageEventDetails = [];
       let status = "PENDING_INITIALIZATION";
-      let isRapid = true;
+      let isRapid = false;
       let streamDetails;
 
       const addCanvasImageToElmBackground = (canvas, elm) => {
@@ -541,9 +541,7 @@
         selectImageEventDetails.forEach(({ event, elm }, j) => {
           elm.removeEventListener("click", event);
         });
-        while (selectImageEventDetails.length !== 0) {
-          selectImageEventDetails.pop();
-        }
+        selectImageEventDetails = [];
       };
       const addSelectImageEvents = (initOnSelectImage) => {
         const onSelectImage = initOnSelectImage ? initOnSelectImage : () => {};
