@@ -262,7 +262,6 @@
     </section>
 
     <section id="captured-images-section" style="flex: 1">
-      <button onclick="removeSelectImageEvents()">remove listeners</button>
       <div
         class="canvases"
         style="
@@ -447,9 +446,6 @@
           hide(qrSection);
         }
         if (status === "SUCCESS") {
-          console.log(selectImageEventDetails);
-          removeSelectImageEvents();
-          console.log(selectImageEventDetails);
           printImageButton.disabled = true;
           show(successMessageSection);
           hide(errorMessageSection);
@@ -463,9 +459,6 @@
           hide(qrSection);
         }
         if (status === "FAIL") {
-          console.log(selectImageEventDetails);
-          removeSelectImageEvents();
-          console.log(selectImageEventDetails);
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
