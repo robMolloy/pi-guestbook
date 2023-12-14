@@ -262,6 +262,7 @@
     </section>
 
     <section id="captured-images-section" style="flex: 1">
+      <button onclick="removeSelectImageEvents()">remove listeners</button>
       <div
         class="canvases"
         style="
@@ -310,8 +311,9 @@
     </section>
 
     <script>
+      let selectImageEventDetails = [];
       let status = "PENDING_INITIALIZATION";
-      let isRapid = false;
+      let isRapid = true;
       let streamDetails;
 
       const addCanvasImageToElmBackground = (canvas, elm) => {
@@ -445,6 +447,9 @@
           hide(qrSection);
         }
         if (status === "SUCCESS") {
+          console.log(selectImageEventDetails);
+          removeSelectImageEvents();
+          console.log(selectImageEventDetails);
           printImageButton.disabled = true;
           show(successMessageSection);
           hide(errorMessageSection);
@@ -458,6 +463,9 @@
           hide(qrSection);
         }
         if (status === "FAIL") {
+          console.log(selectImageEventDetails);
+          removeSelectImageEvents();
+          console.log(selectImageEventDetails);
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
@@ -535,16 +543,31 @@
         const { width: newWidth, height: newHeight } = newCanvas;
         newContext.drawImage(oldCanvas, 0, 0, newWidth, newHeight);
       };
+
+      const removeSelectImageEvents = () => {
+        selectImageEventDetails.forEach(({ event, elm }, j) => {
+          elm.removeEventListener("click", event);
+        });
+        while (selectImageEventDetails.length !== 0) {
+          selectImageEventDetails.pop();
+        }
+      };
       const addSelectImageEvents = (initOnSelectImage) => {
         const onSelectImage = initOnSelectImage ? initOnSelectImage : () => {};
 
-        for (const captureCanvas of captureCanvases) {
-          captureCanvas.parentElement.addEventListener("click", () => {
+        captureCanvases.forEach((captureCanvas) => {
+          const event = () => {
+            console.log("select:", captureCanvas);
             handleSelectImage(selectedImageCanvas, captureCanvas);
             printImageButton.disabled = false;
             onSelectImage();
+          };
+          captureCanvas.parentElement.addEventListener("click", event);
+          selectImageEventDetails.push({
+            event,
+            elm: captureCanvas.parentElement,
           });
-        }
+        });
       };
 
       const countdown = async (x = 5) => {
@@ -615,25 +638,31 @@
       };
 
       const reInit = () => {
+        removeSelectImageEvents();
+
         setupStream();
         setupCaptureCanvases();
         setupSelectedImageCanvas();
 
         setStatus("READY");
       };
+
+      const setupCaptureImagesEvent = async () => {
+        if (status === "READY") {
+          setStatus("CAPTURING");
+          await captureImages();
+          setStatus("UNSELECTED");
+          addSelectImageEvents(() => setStatus("SELECTED"));
+        }
+      };
+
       const init = async () => {
         setStatus("INITIALIZING");
 
         streamDetails = await getStreamDetails();
 
-        window.addEventListener("click", async () => {
-          if (status === "READY") {
-            setStatus("CAPTURING");
-            await captureImages();
-            setStatus("UNSELECTED");
-            addSelectImageEvents(() => setStatus("SELECTED"));
-          }
-        });
+        window.removeEventListener("click", setupCaptureImagesEvent);
+        window.addEventListener("click", setupCaptureImagesEvent);
         reInit();
       };
 
