@@ -1,0 +1,39 @@
+{
+  "name": "pi guestbook",
+  "id": "pi guestbook",
+  "short_name": "PWA",
+  "description": "A simple pi guestbook",
+  "start_url": "/index.html",
+  "display": "fullscreen",
+  "display_override": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/assets/favicons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/favicons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/pi-guestbook-screenshot-wide.png",
+      "sizes": "3680x2240",
+      "type": "image/png",
+      "purpose": "any",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/assets/pi-guestbook-screenshot-narrow.png",
+      "sizes": "1376x2240",
+      "type": "image/png",
+      "purpose": "any",
+      "form_factor": "narrow"
+    }
+  ]
+}
