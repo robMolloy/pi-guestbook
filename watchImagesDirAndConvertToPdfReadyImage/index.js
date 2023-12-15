@@ -1,6 +1,5 @@
 const chokidar = require("chokidar");
 const sharp = require("sharp");
-const gm = require("gm").subClass({ imageMagick: true });
 
 const { promisify } = require("util");
 const sizeOf = promisify(require("image-size"));
