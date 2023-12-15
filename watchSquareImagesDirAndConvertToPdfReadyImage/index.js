@@ -56,7 +56,7 @@ const main = async () => {
   let isReady = false;
 
   chokidar
-    .watch("../files/images")
+    .watch("../files/squareImages")
     .on("ready", () => {
       isReady = true;
     })

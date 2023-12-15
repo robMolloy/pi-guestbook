@@ -13,7 +13,7 @@ app.use(bodyParser.json({ limit: "500mb" }));
 app.post("/print-image", async (req, res) => {
   const imageDataUrl = req.body.image;
   const imageData = imageDataUrl.split(";base64,")[1];
-  const imageName = `../files/images/${new Date().toISOString()}.png`;
+  const imageName = `../files/squareImages/${new Date().toISOString()}.png`;
 
   try {
     await fs.writeFile(imageName, imageData, "base64");
