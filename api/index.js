@@ -26,6 +26,7 @@ const getImageDimensionsFromImageDataUrl = (imageDataUrl) => {
       height: metadata.height,
       ratio: metadata.height / metadata.width,
     };
+
     resolve(imgDims);
   });
 };
