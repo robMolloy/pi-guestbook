@@ -548,7 +548,6 @@
 
         captureCanvases.forEach((captureCanvas) => {
           const event = () => {
-            console.log("select:", captureCanvas);
             handleSelectImage(selectedImageCanvas, captureCanvas);
             printImageButton.disabled = false;
             onSelectImage();
