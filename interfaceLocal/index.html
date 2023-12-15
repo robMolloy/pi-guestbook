@@ -577,7 +577,7 @@
       const sendSelectedImage = async (e) => {
         e.preventDefault();
         try {
-          const resp = await fetch("http://localhost:3000/print-image", {
+          const resp = await fetch("http://localhost:3000/save-square-image", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
