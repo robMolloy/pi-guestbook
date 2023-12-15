@@ -41,12 +41,23 @@ const resize = async (fileName, resizeFileName, newImageDimensions) => {
   });
 };
 
-const imageToPdf = async (imageName, pdfName) => {
+const imageToPdf2 = async (imageName, pdfName) => {
   const pages = [imageName];
 
   await imgToPDF(pages, imgToPDF.sizes.A4H).pipe(fs.createWriteStream(pdfName));
 
   return pdfName;
+};
+
+const imageToPdf = async (imagePath, pdfPath) => {
+  const imagePaths = [imagePath];
+
+  const paperDimensions = [88.9, 127];
+  await imgToPDF(imagePaths, paperDimensions).pipe(
+    fs.createWriteStream(pdfPath)
+  );
+
+  return pdfPath;
 };
 
 const exc = (x) => {
