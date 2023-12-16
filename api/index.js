@@ -31,6 +31,12 @@ const getImageDimensionsFromImageDataUrl = (imageDataUrl) => {
   });
 };
 
+app.get("/", async (req, res) => {
+  return res
+    .status(500)
+    .json({ success: false, message: "Image is not square" });
+});
+
 app.post("/save-square-image", async (req, res) => {
   const imageDataUrl = req.body.image;
   const imageDimensions = await getImageDimensionsFromImageDataUrl(

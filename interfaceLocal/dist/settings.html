@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A guestbook for Chris & Sam's wedding" />
+
+    <title>Pi guestbook | settings</title>
+  </head>
+  <body>
+    <label for="api-base-url">api-base-url (include the /):</label>
+    <input
+      type="text"
+      id="api-base-url"
+      name="api-base-url"
+      aria-label="Enter the api-base-url"
+      value=""
+      required
+    />
+    <br />
+    <br />
+
+    <pre id="display-settings"></pre>
+
+    <button onclick="saveSettings()">Save settings</button>
+    <script>
+      const baseUrlInput = document.getElementById("api-base-url");
+      const displaySettingsElm = document.getElementById("display-settings");
+
+      const saveSettings = () => {
+        const baseUrlInputValue = baseUrlInput.value;
+        localStorage.setItem("base-url", baseUrlInputValue);
+
+        displaySettings();
+      };
+
+      const getSettings = () => {
+        const baseUrl = localStorage.getItem("base-url");
+        return { baseUrl };
+      };
+
+      const displaySettings = () => {
+        const settings = getSettings();
+
+        displaySettingsElm.innerHTML = JSON.stringify(settings, undefined, 2);
+      };
+      displaySettings();
+      baseUrlInput.value = getSettings().baseUrl;
+    </script>
+  </body>
+</html>

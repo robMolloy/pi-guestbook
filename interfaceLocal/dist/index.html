@@ -4,7 +4,9 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta name="description" content="A guestbook for Chris & Sam's wedding" />
+
+    <title>Pi guestbook</title>
 
     <link rel="manifest" href="/manifest.json" />
 
@@ -142,9 +144,14 @@
         <span>
           <h1>Error</h1>
           <p>Something went wrong</p>
+
           <button class="my-button fail" onclick="init()">
             Tap to try again
           </button>
+
+          <div>
+            <pre id="error-details"></pre>
+          </div>
         </span>
       </div>
     </section>
@@ -329,6 +336,7 @@
       const successMessageSection = document.getElementById(
         "success-message-section"
       );
+      const errorDetailsElm = document.getElementById("error-details");
       const errorMessageSection = document.getElementById(
         "error-message-section"
       );
@@ -381,6 +389,7 @@
         if (status === "PENDING_INITIALIZATION") {
         }
         if (status === "INITIALIZING") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
@@ -395,6 +404,7 @@
           show(qrSection);
         }
         if (status === "READY") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
@@ -409,6 +419,7 @@
           show(qrSection);
         }
         if (status === "CAPTURING") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           show(countdownText);
           hide(successMessageSection);
@@ -423,6 +434,7 @@
           hide(qrSection);
         }
         if (status === "UNSELECTED") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
@@ -437,6 +449,7 @@
           hide(qrSection);
         }
         if (status === "SELECTED") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = false;
           hide(countdownText);
           hide(successMessageSection);
@@ -451,6 +464,7 @@
           hide(qrSection);
         }
         if (status === "SUCCESS") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           show(successMessageSection);
           hide(errorMessageSection);
@@ -578,18 +592,27 @@
         return;
       };
 
+      const getSettings = () => {
+        const baseUrl = localStorage.getItem("base-url");
+        return { baseUrl };
+      };
+
       const sendSelectedImage = async (e) => {
         e.preventDefault();
         try {
-          const resp = await fetch("http://localhost:3000/save-square-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
-          });
+          const resp = await fetch(
+            `${getSettings().baseUrl}save-square-image`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
+            }
+          );
           const json = await resp.json();
           if (json.success === true) setStatus("SUCCESS");
           else setStatus("FAIL");
         } catch (error) {
+          errorDetailsElm.innerHTML = JSON.stringify(json);
           console.log(error);
           setStatus("FAIL");
         }
