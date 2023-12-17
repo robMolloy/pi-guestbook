@@ -1,11 +1,17 @@
 const express = require("express");
-const fs = require("fs").promises;
+const fs = require("fs");
+const fsPromises = fs.promises;
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const sharp = require("sharp");
+const https = require("https");
 
-const port = 3000;
+const port = 3005;
 const app = express();
+
+const privateKey = fs.readFileSync("server.key", "utf8");
+const certificate = fs.readFileSync("server.crt", "utf8");
+const credentials = { key: privateKey, cert: certificate };
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "500mb" }));
@@ -53,7 +59,7 @@ app.post("/save-square-image", async (req, res) => {
   const imageName = `../files/squareImages/${new Date().toISOString()}.png`;
 
   try {
-    await fs.writeFile(imageName, imageData, "base64");
+    await fsPromises.writeFile(imageName, imageData, "base64");
     console.log(`${imageName} uploaded successfully`);
     res
       .status(200)
@@ -64,6 +70,10 @@ app.post("/save-square-image", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+// Create HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+// Start the server
+httpsServer.listen(port, () => {
+  console.log(`Server running on https://localhost:${port}`);
 });

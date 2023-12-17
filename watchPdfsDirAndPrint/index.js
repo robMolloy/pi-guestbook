@@ -25,12 +25,14 @@ const main = async () => {
   let isReady = false;
 
   chokidar
-    .watch("../files/images")
+    .watch("../files/pdfs")
     .on("ready", () => {
       isReady = true;
     })
     .on("all", async (event, pdfPath) => {
-      if (isReady && event === "add") print(pdfPath);
+      if (isReady && event === "add") {
+        print(pdfPath);
+      }
     });
 };
 

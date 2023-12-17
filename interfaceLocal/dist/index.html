@@ -107,6 +107,12 @@
     </style>
   </head>
   <body>
+    <section id="dev-statuses-section">
+      <button onclick="init()">init()</button>
+      <span id="display-status"></span>
+      <pre id="stream-details"></pre>
+    </section>
+
     <section id="display-status-section" style="display: none">
       <button onclick="init()">init()</button>
       <span id="display-status"></span>
@@ -324,7 +330,7 @@
     <script>
       let selectImageEventDetails = [];
       let status = "PENDING_INITIALIZATION";
-      let isRapid = true;
+      let isRapid = false;
       let streamDetails;
 
       const addCanvasImageToElmBackground = (canvas, elm) => {
@@ -333,6 +339,7 @@
         elm.style.backgroundPosition = "center";
       };
 
+      const streamDetailsElm = document.getElementById("stream-details");
       const successMessageSection = document.getElementById(
         "success-message-section"
       );
@@ -508,6 +515,7 @@
             video: {
               width: { min: 576, ideal: 1080, max: 1080 },
               height: { min: 576, ideal: 1080, max: 1080 },
+              ratio: 1,
             },
           });
         } catch (e) {
@@ -520,11 +528,14 @@
           .find((x) => !!x)
           .getSettings();
 
-        return {
+        const details = {
           data: streamData,
           width: settings.width,
           height: settings.height,
         };
+        console.log(streamDetails);
+        streamDetailsElm.innerHTML = JSON.stringify(details, undefined, 2);
+        return details;
       };
 
       const setupStream = () => {
