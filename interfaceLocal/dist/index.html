@@ -507,16 +507,32 @@
         });
       };
 
-      const getStreamDetails = async () => {
+      const getMaxVideoMediaDimensions = async ({ aspectRatio, ideal }) => {
+        const videoMedia = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { width: { ideal }, height: { ideal }, ratio: aspectRatio },
+        });
+
+        const settings = videoMedia
+          .getVideoTracks()
+          .find((x) => !!x)
+          .getSettings();
+
+        const wMax = settings.width;
+        const hMax = settings.height;
+
+        if (aspectRatio * wMax <= hMax)
+          return { width: wMax, height: aspectRatio * wMax };
+        if (hMax / aspectRatio <= wMax)
+          return { width: hMax / aspectRatio, height: hMax };
+      };
+
+      const getStreamDetails = async ({ width, height }) => {
         let streamData;
         try {
           streamData = await navigator.mediaDevices.getUserMedia({
             audio: false,
-            video: {
-              width: { ideal: 1080 },
-              height: { ideal: 1080 },
-              ratio: 1,
-            },
+            video: { width: { ideal: width }, height: { ideal: height } },
           });
         } catch (e) {
           console.log(e);
@@ -687,8 +703,12 @@
 
       const init = async () => {
         setStatus("INITIALIZING");
+        const maxVideoMediaDimensions = await getMaxVideoMediaDimensions({
+          aspectRatio: 1,
+          ideal: 1080,
+        });
 
-        streamDetails = await getStreamDetails();
+        streamDetails = await getStreamDetails(maxVideoMediaDimensions);
 
         window.removeEventListener("click", setupCaptureImagesEvent);
         window.addEventListener("click", setupCaptureImagesEvent);
