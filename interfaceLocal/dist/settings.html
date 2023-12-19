@@ -19,6 +19,17 @@
       required
     />
     <br />
+    <label for="is-rapid">is-rapid (include the /):</label>
+    <input
+      type="checkbox"
+      id="is-rapid"
+      name="is-rapid"
+      aria-label="is-rapid?"
+      value="true"
+      required
+    />
+    <br />
+
     <br />
 
     <pre id="display-settings"></pre>
@@ -26,18 +37,25 @@
     <button onclick="saveSettings()">Save settings</button>
     <script>
       const baseUrlInput = document.getElementById("api-base-url");
+      const isRapidInput = document.getElementById("is-rapid");
       const displaySettingsElm = document.getElementById("display-settings");
 
       const saveSettings = () => {
         const baseUrlInputValue = baseUrlInput.value;
+
+        const isRapidInputValue = isRapidInput.checked
+          ? isRapidInput.value
+          : "";
         localStorage.setItem("base-url", baseUrlInputValue);
+        localStorage.setItem("is-rapid", isRapidInputValue);
 
         displaySettings();
       };
 
       const getSettings = () => {
         const baseUrl = localStorage.getItem("base-url");
-        return { baseUrl };
+        const isRapid = localStorage.getItem("is-rapid");
+        return { baseUrl, isRapid };
       };
 
       const displaySettings = () => {
@@ -47,6 +65,7 @@
       };
       displaySettings();
       baseUrlInput.value = getSettings().baseUrl;
+      isRapidInput.checked = getSettings().isRapid === "true" ? "checked" : "";
     </script>
   </body>
 </html>
