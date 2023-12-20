@@ -8,7 +8,7 @@
 
     <title>Pi guestbook</title>
 
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="./manifest.json" />
 
     <link rel="icon" href="./assets/favicons/favicon.ico" type="image/x-icon" />
 
@@ -111,6 +111,7 @@
       <button onclick="init()">init()</button>
       <span id="display-status"></span>
       <pre id="stream-details"></pre>
+      <pre id="dev-settings"></pre>
     </section>
 
     <section id="display-status-section" style="display: none">
@@ -181,10 +182,7 @@
 
     <section id="stream-section">
       <div style="display: flex; justify-content: center">
-        <div
-          class="stream-container"
-          style="height: 37vh; width: 37vh; position: relative"
-        >
+        <div class="stream-container" style="height: 37vh; position: relative">
           <div
             style="
               position: absolute;
@@ -243,17 +241,20 @@
     <section id="image-selected-section">
       <div style="display: flex; justify-content: center; position: relative">
         <div
+          id="selected-image-container"
           class="selected-image-container"
           style="
             height: 37vh;
-            width: 37vh;
             background-color: gray;
             display: flex;
             justify-content: center;
             align-items: center;
           "
         >
-          <div style="position: absolute; color: white">
+          <div
+            style="position: absolute; color: white"
+            id="selected-image-container-instructions"
+          >
             <h1>Select your favourite photo</h1>
           </div>
           <div style="z-index: 1">
@@ -330,7 +331,20 @@
     <script>
       let selectImageEventDetails = [];
       let status = "PENDING_INITIALIZATION";
-      let isRapid = localStorage.getItem("is-rapid") === "true";
+      const isRapid = localStorage.getItem("is-rapid") === "true";
+      const paperSize = (() => {
+        try {
+          const sizeStr = localStorage.getItem("paper-size");
+          const size = JSON.parse(localStorage.getItem("paper-size"));
+          return size;
+        } catch (e) {
+          console.error(e);
+          return { width: 3.5, height: 5 };
+        }
+      })();
+      const fillType = localStorage.getItem("fill-type");
+      const aspectRatio =
+        fillType === "square" ? 1 : paperSize.width / paperSize.height;
       let streamDetails;
 
       const addCanvasImageToElmBackground = (canvas, elm) => {
@@ -340,6 +354,10 @@
       };
 
       const streamDetailsElm = document.getElementById("stream-details");
+      const devSettingsElm = document.getElementById("dev-settings");
+      const devStatusesSection = document.getElementById(
+        "dev-statuses-section"
+      );
       const successMessageSection = document.getElementById(
         "success-message-section"
       );
@@ -359,6 +377,9 @@
 
       const imageSelectionInstructionsSection = document.getElementById(
         "image-selection-instructions-section"
+      );
+      const selectedImageContainerInstructions = document.getElementById(
+        "selected-image-container-instructions"
       );
       const imageSelectedSection = document.getElementById(
         "image-selected-section"
@@ -408,7 +429,7 @@
           hide(imageSelectedSection);
           hide(confirmImageSection);
           hide(capturedImagesSection);
-          show(qrSection);
+          hide(qrSection);
         }
         if (status === "READY") {
           errorDetailsElm.innerHTML = "";
@@ -423,7 +444,7 @@
           hide(imageSelectedSection);
           hide(confirmImageSection);
           hide(capturedImagesSection);
-          show(qrSection);
+          hide(qrSection);
         }
         if (status === "CAPTURING") {
           errorDetailsElm.innerHTML = "";
@@ -521,10 +542,14 @@
         const wMax = settings.width;
         const hMax = settings.height;
 
-        if (aspectRatio * wMax <= hMax)
-          return { width: wMax, height: aspectRatio * wMax };
-        if (hMax / aspectRatio <= wMax)
-          return { width: hMax / aspectRatio, height: hMax };
+        if (wMax / aspectRatio <= hMax) {
+          const rtn = { width: wMax, height: wMax / aspectRatio };
+          return rtn;
+        }
+        if (hMax * aspectRatio <= wMax) {
+          const rtn = { width: hMax * aspectRatio, height: hMax };
+          return rtn;
+        }
       };
 
       const getStreamDetails = async ({ width, height }) => {
@@ -535,7 +560,7 @@
             video: { width: { ideal: width }, height: { ideal: height } },
           });
         } catch (e) {
-          console.log(e);
+          console.error(e);
           window.alert(`Can't connect to webcam right now...`);
         }
 
@@ -549,7 +574,7 @@
           width: settings.width,
           height: settings.height,
         };
-        console.log(streamDetails);
+
         streamDetailsElm.innerHTML = JSON.stringify(details, undefined, 2);
         return details;
       };
@@ -570,10 +595,22 @@
         }
       };
       const setupSelectedImageCanvas = () => {
+        show(selectedImageContainerInstructions);
         const context = selectedImageCanvas.getContext("2d");
         const { width, height } = streamDetails;
         selectedImageCanvas.width = width;
         selectedImageCanvas.height = height;
+
+        const selectedImageContainer = document.getElementById(
+          "selected-image-container"
+        );
+        const height1 = selectedImageContainer.style.height;
+        const height1Units = height1.match(/[a-zA-Z]+/g);
+        const height1Value = parseInt(height1.match(/\d+/g));
+
+        const width1Value = parseInt(height1Value / aspectRatio);
+
+        selectedImageContainer.style.width = `${width1Value}${height1Units}`;
       };
 
       const handleSelectImage = (newCanvas, oldCanvas) => {
@@ -596,6 +633,7 @@
           const event = () => {
             handleSelectImage(selectedImageCanvas, captureCanvas);
             printImageButton.disabled = false;
+            hide(selectedImageContainerInstructions);
             onSelectImage();
           };
           captureCanvas.parentElement.addEventListener("click", event);
@@ -640,7 +678,7 @@
           else setStatus("FAIL");
         } catch (error) {
           errorDetailsElm.innerHTML = JSON.stringify(json);
-          console.log(error);
+          console.error(error);
           setStatus("FAIL");
         }
       };
@@ -683,9 +721,11 @@
       };
 
       const reInit = () => {
+        window.removeEventListener("click", setupCaptureImagesEvent);
+        window.addEventListener("click", setupCaptureImagesEvent);
+
         removeSelectImageEvents();
 
-        setupStream();
         setupCaptureCanvases();
         setupSelectedImageCanvas();
 
@@ -701,28 +741,41 @@
         }
       };
 
+      const getDevSettings = () => {
+        const baseUrl = localStorage.getItem("base-url");
+        const isRapid = localStorage.getItem("is-rapid") === "true";
+        const paperSize = localStorage.getItem("paper-size");
+        const fillType = localStorage.getItem("fill-type");
+        return { baseUrl, isRapid, paperSize, fillType };
+      };
+      const displayDevSettings = () => {
+        const devSettings = getDevSettings();
+        devSettingsElm.innerHTML = JSON.stringify(devSettings, undefined, 2);
+      };
+
       const init = async () => {
         setStatus("INITIALIZING");
         const maxVideoMediaDimensions = await getMaxVideoMediaDimensions({
-          aspectRatio: 1,
+          aspectRatio,
           ideal: 1080,
         });
 
         streamDetails = await getStreamDetails(maxVideoMediaDimensions);
+        setupStream();
+        displayDevSettings();
+        hide(devStatusesSection);
 
-        window.removeEventListener("click", setupCaptureImagesEvent);
-        window.addEventListener("click", setupCaptureImagesEvent);
         reInit();
       };
 
       init();
     </script>
 
-    <script src="/service-worker.js"></script>
+    <script src="./service-worker.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker
-          .register("/service-worker.js")
+          .register("./service-worker.js")
           .then((registration) => {
             console.log(
               "Service Worker registered with scope:",

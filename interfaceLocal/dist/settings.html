@@ -30,6 +30,77 @@
     />
     <br />
 
+    <fieldset>
+      <legend>Select paper size:</legend>
+
+      <div>
+        <input
+          type="radio"
+          id="paper-size-3.5x5"
+          name="paper-size"
+          value='{"width":3.5,"height":5}'
+          onclick='selectPaperSize(`{"width":3.5,"height":5}`)'
+          aria-labelledby="paper-size-3.5x5-label"
+          required
+        />
+        <label for="paper-size-3.5x5" id="paper-size-3.5x5-label">3.5x5</label>
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="paper-size-4x6"
+          name="paper-size"
+          value='{"width":4,"height":6}'
+          onclick='selectPaperSize(`{"width":4,"height":6}`)'
+          aria-labelledby="paper-size-4x6-label"
+          required
+        />
+        <label for="paper-size-4x6" id="paper-size-4x6-label">4x6</label>
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="paper-size-6x4"
+          name="paper-size"
+          value='{"width":6,"height":4}'
+          onclick='selectPaperSize(`{"width":6,"height":4}`)'
+          aria-labelledby="paper-size-6x4-label"
+          required
+        />
+        <label for="paper-size-6x4" id="paper-size-6x4-label">6x4</label>
+      </div>
+    </fieldset>
+    <br />
+    <fieldset>
+      <legend>Select fill type:</legend>
+
+      <div>
+        <input
+          type="radio"
+          id="fill-type-square"
+          name="fill-type"
+          value="square"
+          onclick="selectFillType(`square`)"
+          aria-labelledby="fill-type-square-label"
+          required
+        />
+        <label for="fill-type-square" id="fill-type-square-label">square</label>
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="fill-type-rectangle"
+          name="fill-type"
+          value="rectangle"
+          onclick="selectFillType(`rectangle`)"
+          aria-labelledby="fill-type-rectangle-label"
+          required
+        />
+        <label for="fill-type-rectangle" id="fill-type-rectangle-label"
+          >rectangle</label
+        >
+      </div>
+    </fieldset>
     <br />
 
     <pre id="display-settings"></pre>
@@ -39,23 +110,56 @@
       const baseUrlInput = document.getElementById("api-base-url");
       const isRapidInput = document.getElementById("is-rapid");
       const displaySettingsElm = document.getElementById("display-settings");
+      const paperSizeElms = Array.from(
+        document.querySelectorAll('input[name="paper-size"]')
+      );
+      const fillTypeElms = Array.from(
+        document.querySelectorAll('input[name="fill-type"]')
+      );
+
+      const selectPaperSize = (val) => {
+        const paperSizeElm = paperSizeElms.find((x) => x.value === val);
+        if (!paperSizeElm) return;
+        paperSizeElm.checked = true;
+      };
+      const getPaperSize = (val) => {
+        const paperSizeElm = paperSizeElms.find((x) => !!x.checked);
+        if (!paperSizeElm) return "";
+        return paperSizeElm.value;
+      };
+      const selectFillType = (val) => {
+        const fillTypeElm = fillTypeElms.find((x) => x.value === val);
+        if (!fillTypeElm) return "";
+        fillTypeElm.checked = true;
+      };
+      const getFillType = (val) => {
+        const fillTypeElm = fillTypeElms.find((x) => !!x.checked);
+        if (!fillTypeElm) return;
+        return fillTypeElm.value;
+      };
 
       const saveSettings = () => {
         const baseUrlInputValue = baseUrlInput.value;
-
         const isRapidInputValue = isRapidInput.checked
           ? isRapidInput.value
           : "";
+        const paperSizeInputValue = getPaperSize();
+        const fillTypeInputValue = getFillType();
+
         localStorage.setItem("base-url", baseUrlInputValue);
         localStorage.setItem("is-rapid", isRapidInputValue);
+        localStorage.setItem("paper-size", paperSizeInputValue);
+        localStorage.setItem("fill-type", fillTypeInputValue);
 
         displaySettings();
       };
 
       const getSettings = () => {
         const baseUrl = localStorage.getItem("base-url");
-        const isRapid = localStorage.getItem("is-rapid");
-        return { baseUrl, isRapid };
+        const isRapid = localStorage.getItem("is-rapid") === "true";
+        const paperSize = localStorage.getItem("paper-size");
+        const fillType = localStorage.getItem("fill-type");
+        return { baseUrl, isRapid, paperSize, fillType };
       };
 
       const displaySettings = () => {
@@ -64,8 +168,12 @@
         displaySettingsElm.innerHTML = JSON.stringify(settings, undefined, 2);
       };
       displaySettings();
-      baseUrlInput.value = getSettings().baseUrl;
-      isRapidInput.checked = getSettings().isRapid === "true" ? "checked" : "";
+
+      const initialSettings = getSettings();
+      baseUrlInput.value = initialSettings.baseUrl;
+      isRapidInput.checked = initialSettings.isRapid ? "checked" : "";
+      selectPaperSize(initialSettings.paperSize);
+      selectFillType(initialSettings.fillType);
     </script>
   </body>
 </html>
