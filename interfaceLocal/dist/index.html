@@ -343,8 +343,13 @@
         }
       })();
       const fillType = localStorage.getItem("fill-type");
-      const aspectRatio =
-        fillType === "square" ? 1 : paperSize.width / paperSize.height;
+      const aspectRatio = (() => {
+        try {
+          return fillType === "square" ? 1 : paperSize.width / paperSize.height;
+        } catch (error) {
+          return 1;
+        }
+      })();
       let streamDetails;
 
       const addCanvasImageToElmBackground = (canvas, elm) => {
