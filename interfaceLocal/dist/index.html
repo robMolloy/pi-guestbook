@@ -380,6 +380,10 @@
       const streamSection = document.getElementById("stream-section");
       const flashElm = document.getElementById("flash");
 
+      const selectedImageContainer = document.getElementById(
+        "selected-image-container"
+      );
+
       const imageSelectionInstructionsSection = document.getElementById(
         "image-selection-instructions-section"
       );
@@ -606,14 +610,11 @@
         selectedImageCanvas.width = width;
         selectedImageCanvas.height = height;
 
-        const selectedImageContainer = document.getElementById(
-          "selected-image-container"
-        );
         const height1 = selectedImageContainer.style.height;
         const height1Units = height1.match(/[a-zA-Z]+/g);
         const height1Value = parseInt(height1.match(/\d+/g));
 
-        const width1Value = parseInt(height1Value / aspectRatio);
+        const width1Value = parseInt(height1Value * 10 * aspectRatio) / 10;
 
         selectedImageContainer.style.width = `${width1Value}${height1Units}`;
       };
