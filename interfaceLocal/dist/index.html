@@ -671,20 +671,23 @@
       const sendSelectedImage = async (e) => {
         e.preventDefault();
         try {
+          const controller = new AbortController();
+          setTimeout(() => controller.abort(), 3000);
           const resp = await fetch(
-            `${getSettings().baseUrl}save-square-image`,
+            `${getSettings().baseUrl ?? "./"}save-square-image`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
+              signal: controller.signal,
             }
           );
           const json = await resp.json();
           if (json.success === true) setStatus("SUCCESS");
           else setStatus("FAIL");
         } catch (error) {
-          errorDetailsElm.innerHTML = JSON.stringify(json);
-          console.error(error);
+          console.log(error.name);
+          errorDetailsElm.innerHTML = error;
           setStatus("FAIL");
         }
       };
