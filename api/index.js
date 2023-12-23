@@ -14,6 +14,7 @@ const credentials = { key: privateKey, cert: certificate };
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "500mb" }));
+
 app.use(express.static("../interfaceLocal/dist"));
 
 app.post("/save-square-image", handlers.saveSquareImageHandler);
