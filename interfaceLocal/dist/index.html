@@ -732,8 +732,8 @@
       const reInit = () => {
         window.alert("reInit event started");
 
-        window.removeEventListener("click", setupCaptureImagesEvent);
-        window.addEventListener("click", setupCaptureImagesEvent);
+        window.removeEventListener("touchstart", setupCaptureImagesEvent);
+        window.addEventListener("touchstart", setupCaptureImagesEvent);
 
         removeSelectImageEvents();
 
