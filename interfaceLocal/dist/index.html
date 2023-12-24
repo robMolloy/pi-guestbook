@@ -331,6 +331,9 @@
     <script>
       let selectImageEventDetails = [];
       let status = "PENDING_INITIALIZATION";
+      const isTouchDevice = "ontouchstart" in window;
+      const clickEventName = isTouchDevice ? "touchstart" : clickEventName;
+
       const isRapid = localStorage.getItem("is-rapid") === "true";
       const paperSize = (() => {
         try {
@@ -628,7 +631,7 @@
 
       const removeSelectImageEvents = () => {
         selectImageEventDetails.forEach(({ event, elm }, j) => {
-          elm.removeEventListener("click", event);
+          elm.removeEventListener(clickEventName, event);
         });
         selectImageEventDetails = [];
       };
@@ -642,7 +645,7 @@
             hide(selectedImageContainerInstructions);
             onSelectImage();
           };
-          captureCanvas.parentElement.addEventListener("click", event);
+          captureCanvas.parentElement.addEventListener(clickEventName, event);
           selectImageEventDetails.push({
             event,
             elm: captureCanvas.parentElement,
@@ -730,9 +733,6 @@
       };
 
       const reInit = () => {
-        const isTouchDevice = "ontouchstart" in window;
-        const clickEventName = isTouchDevice ? "touchstart" : "click";
-
         window.removeEventListener(clickEventName, setupCaptureImagesEvent);
         window.addEventListener(clickEventName, setupCaptureImagesEvent);
 
@@ -745,8 +745,6 @@
       };
 
       const setupCaptureImagesEvent = async () => {
-        window.alert("test worked");
-
         if (status === "READY") {
           setStatus("CAPTURING");
           await captureImages();
