@@ -730,10 +730,11 @@
       };
 
       const reInit = () => {
-        window.alert("reInit event started");
+        const isTouchDevice = "ontouchstart" in window;
+        const clickEventName = isTouchDevice ? "touchstart" : "click";
 
-        window.removeEventListener("touchstart", setupCaptureImagesEvent);
-        window.addEventListener("touchstart", setupCaptureImagesEvent);
+        window.removeEventListener(clickEventName, setupCaptureImagesEvent);
+        window.addEventListener(clickEventName, setupCaptureImagesEvent);
 
         removeSelectImageEvents();
 
@@ -741,7 +742,6 @@
         setupSelectedImageCanvas();
 
         setStatus("READY");
-        window.alert("reInit event finished");
       };
 
       const setupCaptureImagesEvent = async () => {
