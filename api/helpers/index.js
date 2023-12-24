@@ -1,5 +1,24 @@
 const sharp = require("sharp");
-const fsPromises = require("fs").promises;
+const fs = require("fs");
+const fsPromises = fs.promises;
+const { exec } = require("child_process");
+
+const imgToPDF = require("image-to-pdf");
+
+const imageToPdf = async (imagePath, pdfPath, options) => {
+  const imagePaths = [imagePath];
+
+  // const paperDimensions = [88.9, 127];
+  const paperDimensions =
+    options.width && options.height
+      ? [options.width, options.height]
+      : [152.4, 101.6];
+  await imgToPDF(imagePaths, paperDimensions).pipe(
+    fs.createWriteStream(pdfPath)
+  );
+
+  return pdfPath;
+};
 
 const getImageDataFromImageDataUrl = (imageDataUrl) => {
   return imageDataUrl.split(";base64,")[1];
@@ -34,8 +53,31 @@ const saveImageFromImageData = async (imagePath, imageData) => {
   }
 };
 
+const exc = (x) => {
+  exec(x, (error, stdout, stderr) => {
+    if (error) {
+      console.log(`error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.log(`stderr: ${stderr}`);
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
+  });
+};
+
+const print = (pdfPath) => {
+  const cmd = `lp ${pdfPath}`;
+  console.log(cmd);
+  exc(cmd);
+};
+
 module.exports = {
+  imageToPdf,
   getImageDataFromImageDataUrl,
   getImageDimensionsFromImageDataUrl,
   saveImageFromImageData,
+  exc,
+  print,
 };

@@ -17,7 +17,6 @@ const imageToPdf = async (imagePath, pdfPath) => {
 
   return pdfPath;
 };
-//
 
 const main = async () => {
   let isReady = false;
