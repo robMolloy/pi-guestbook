@@ -742,6 +742,8 @@
       };
 
       const setupCaptureImagesEvent = async () => {
+        window.alert("test worked");
+
         if (status === "READY") {
           setStatus("CAPTURING");
           await captureImages();
