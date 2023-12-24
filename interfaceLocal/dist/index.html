@@ -730,6 +730,8 @@
       };
 
       const reInit = () => {
+        window.alert("reInit event started");
+
         window.removeEventListener("click", setupCaptureImagesEvent);
         window.addEventListener("click", setupCaptureImagesEvent);
 
@@ -739,6 +741,7 @@
         setupSelectedImageCanvas();
 
         setStatus("READY");
+        window.alert("reInit event finished");
       };
 
       const setupCaptureImagesEvent = async () => {
