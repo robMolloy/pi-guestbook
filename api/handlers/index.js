@@ -76,7 +76,7 @@ const resizeSavePdfPrintImageHandler = async (req, res) => {
     console.log("error");
     return res.status(500).json({ success: false, message: "can't print" });
   }
-  return res.status.json({ success: true, message: "success" });
+  return res.status(500).json({ success: true, message: "success" });
 };
 
 module.exports = {
