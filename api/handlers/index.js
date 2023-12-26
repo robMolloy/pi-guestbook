@@ -53,7 +53,7 @@ const resizeSavePdfPrintImageHandler = async (req, res) => {
 
   const resizedImageDataUrl = await new Promise((resolve) => {
     sharp(data)
-      .resize(width / 2, height / 2)
+      .resize(width / 4, height / 4)
       .toBuffer((err, buffer) => {
         if (err) {
           return res
