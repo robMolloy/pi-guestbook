@@ -42,4 +42,44 @@ const savePdfPrintImageHandler = async (req, res) => {
   return res.json({ success: true, message: "success" });
 };
 
-module.exports = { saveSquareImageHandler, savePdfPrintImageHandler };
+const resizeSavePdfPrintImageHandler = async (req, res) => {
+  const imageDataUrl = req.body.image;
+  const data = Buffer.from(imageDataUrl.split(",")[1], "base64");
+  const pdfPath = `../files/pdfs/${new Date().toISOString()}.pdf`;
+
+  const { width, height } = await getImageDimensionsFromImageDataUrl(
+    imageDataUrl
+  );
+
+  const resizedImageDataUrl = await new Promise((resolve) => {
+    sharp(data)
+      .resize(width / 2, height / 2)
+      .toBuffer((err, buffer) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ success: false, message: "can't print" });
+        } else {
+          const base64Image = buffer.toString("base64");
+
+          resolve(`data:image/png;base64,${base64Image}`);
+        }
+      });
+  });
+
+  await imageToPdf(resizedImageDataUrl, pdfPath);
+
+  try {
+    print(pdfPath);
+  } catch (error) {
+    console.log("error");
+    return res.status(500).json({ success: false, message: "can't print" });
+  }
+  return res.status.json({ success: true, message: "success" });
+};
+
+module.exports = {
+  saveSquareImageHandler,
+  savePdfPrintImageHandler,
+  resizeSavePdfPrintImageHandler,
+};

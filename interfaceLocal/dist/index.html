@@ -677,7 +677,7 @@
           const controller = new AbortController();
           setTimeout(() => controller.abort(), 3000);
           const resp = await fetch(
-            `${getSettings().baseUrl ?? "./"}save-pdf-print-image`,
+            `${getSettings().baseUrl ?? "./"}resize-save-pdf-print-image`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

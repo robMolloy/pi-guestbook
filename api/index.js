@@ -21,6 +21,11 @@ app.post("/save-square-image", handlers.saveSquareImageHandler);
 
 app.post("/save-pdf-print-image", handlers.savePdfPrintImageHandler);
 
+app.post(
+  "/resize-save-pdf-print-image",
+  handlers.resizeSavePdfPrintImageHandler
+);
+
 // Create HTTPS server
 const httpsServer = https.createServer(credentials, app);
 
