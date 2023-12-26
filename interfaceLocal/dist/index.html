@@ -332,7 +332,7 @@
       let selectImageEventDetails = [];
       let status = "PENDING_INITIALIZATION";
       const isTouchDevice = "ontouchstart" in window;
-      const clickEventName = isTouchDevice ? "touchstart" : clickEventName;
+      const clickEventName = isTouchDevice ? "touchstart" : "click";
 
       const isRapid = localStorage.getItem("is-rapid") === "true";
       const paperSize = (() => {

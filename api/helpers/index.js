@@ -5,12 +5,12 @@ const { exec } = require("child_process");
 
 const imgToPDF = require("image-to-pdf");
 
-const imageToPdf = async (imagePath, pdfPath, options) => {
+const imageToPdf = async (imagePath, pdfPath, options = {}) => {
   const imagePaths = [imagePath];
 
   // const paperDimensions = [88.9, 127];
   const paperDimensions =
-    options.width && options.height
+    options?.width && options?.height
       ? [options.width, options.height]
       : [152.4, 101.6];
   await imgToPDF(imagePaths, paperDimensions).pipe(
