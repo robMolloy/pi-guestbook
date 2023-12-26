@@ -5,6 +5,7 @@ const {
   imageToPdf,
   print,
 } = require("../helpers/index");
+const sharp = require("sharp");
 
 const saveSquareImageHandler = async (req, res) => {
   const imageDataUrl = req.body.image;
