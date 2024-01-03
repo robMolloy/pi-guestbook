@@ -7,9 +7,16 @@ const {
 } = require("../helpers/index");
 const sharp = require("sharp");
 
+const delay = async (x) => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(true), x);
+  });
+};
 const ping = async (req, res) => {
+  await delay(1000);
   return res.status(200).json({ success: true });
 };
+
 const saveSquareImageHandler = async (req, res) => {
   const imageDataUrl = req.body.image;
   const imageDimensions = await getImageDimensionsFromImageDataUrl(
@@ -46,6 +53,21 @@ const savePdfPrintImageHandler = async (req, res) => {
   return res.json({ success: true, message: "success" });
 };
 
+const savePdfPrint6x4ImageHandler = async (req, res) => {
+  const imageDataUrl = req.body.image;
+  const pdfPath = `../files/pdfs/${new Date().toISOString()}.pdf`;
+
+  await imageToPdf(imageDataUrl, pdfPath);
+
+  try {
+    print(pdfPath);
+  } catch (error) {
+    console.log("error");
+    return res.status(500).json({ success: false, message: "can't print" });
+  }
+
+  return res.json({ success: true, message: "success" });
+};
 const resizeSavePdfPrintImageHandler = async (req, res) => {
   const imageDataUrl = req.body.image;
   const data = Buffer.from(imageDataUrl.split(",")[1], "base64");
@@ -86,5 +108,6 @@ module.exports = {
   ping,
   saveSquareImageHandler,
   savePdfPrintImageHandler,
+  savePdfPrint6x4ImageHandler,
   resizeSavePdfPrintImageHandler,
 };

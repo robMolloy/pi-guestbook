@@ -21,6 +21,7 @@ app.get("/ping", handlers.ping);
 app.post("/save-square-image", handlers.saveSquareImageHandler);
 
 app.post("/save-pdf-print-image", handlers.savePdfPrintImageHandler);
+app.post("/save-pdf-print-6x4-image", handlers.savePdfPrint6x4ImageHandler);
 
 app.post(
   "/resize-save-pdf-print-image",
