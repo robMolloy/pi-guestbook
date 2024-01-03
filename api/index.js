@@ -17,6 +17,7 @@ app.use(bodyParser.json({ limit: "500mb" }));
 
 app.use(express.static("../interfaceLocal/dist"));
 
+app.get("/ping", handlers.ping);
 app.post("/save-square-image", handlers.saveSquareImageHandler);
 
 app.post("/save-pdf-print-image", handlers.savePdfPrintImageHandler);

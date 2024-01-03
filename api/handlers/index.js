@@ -7,6 +7,9 @@ const {
 } = require("../helpers/index");
 const sharp = require("sharp");
 
+const ping = async (req, res) => {
+  return res.status(200).json({ success: true });
+};
 const saveSquareImageHandler = async (req, res) => {
   const imageDataUrl = req.body.image;
   const imageDimensions = await getImageDimensionsFromImageDataUrl(
@@ -80,6 +83,7 @@ const resizeSavePdfPrintImageHandler = async (req, res) => {
 };
 
 module.exports = {
+  ping,
   saveSquareImageHandler,
   savePdfPrintImageHandler,
   resizeSavePdfPrintImageHandler,
