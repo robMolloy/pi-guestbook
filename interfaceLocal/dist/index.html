@@ -4,9 +4,11 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta name="description" content="A guestbook for Chris & Sam's wedding" />
 
-    <link rel="manifest" href="/manifest.json" />
+    <title>Pi guestbook</title>
+
+    <link rel="manifest" href="./manifest.json" />
 
     <link rel="icon" href="./assets/favicons/favicon.ico" type="image/x-icon" />
 
@@ -105,6 +107,13 @@
     </style>
   </head>
   <body>
+    <section id="dev-statuses-section">
+      <button onclick="init()">init()</button>
+      <span id="display-status"></span>
+      <pre id="stream-details"></pre>
+      <pre id="dev-settings"></pre>
+    </section>
+
     <section id="display-status-section" style="display: none">
       <button onclick="init()">init()</button>
       <span id="display-status"></span>
@@ -142,9 +151,14 @@
         <span>
           <h1>Error</h1>
           <p>Something went wrong</p>
+
           <button class="my-button fail" onclick="init()">
             Tap to try again
           </button>
+
+          <div>
+            <pre id="error-details"></pre>
+          </div>
         </span>
       </div>
     </section>
@@ -168,10 +182,7 @@
 
     <section id="stream-section">
       <div style="display: flex; justify-content: center">
-        <div
-          class="stream-container"
-          style="height: 37vh; width: 37vh; position: relative"
-        >
+        <div class="stream-container" style="height: 37vh; position: relative">
           <div
             style="
               position: absolute;
@@ -230,17 +241,20 @@
     <section id="image-selected-section">
       <div style="display: flex; justify-content: center; position: relative">
         <div
+          id="selected-image-container"
           class="selected-image-container"
           style="
             height: 37vh;
-            width: 37vh;
             background-color: gray;
             display: flex;
             justify-content: center;
             align-items: center;
           "
         >
-          <div style="position: absolute; color: white">
+          <div
+            style="position: absolute; color: white"
+            id="selected-image-container-instructions"
+          >
             <h1>Select your favourite photo</h1>
           </div>
           <div style="z-index: 1">
@@ -317,7 +331,28 @@
     <script>
       let selectImageEventDetails = [];
       let status = "PENDING_INITIALIZATION";
-      let isRapid = true;
+      const isTouchDevice = "ontouchstart" in window;
+      const clickEventName = isTouchDevice ? "touchstart" : "click";
+
+      const isRapid = localStorage.getItem("is-rapid") === "true";
+      const paperSize = (() => {
+        try {
+          const sizeStr = localStorage.getItem("paper-size");
+          const size = JSON.parse(localStorage.getItem("paper-size"));
+          return size;
+        } catch (e) {
+          console.error(e);
+          return { width: 3.5, height: 5 };
+        }
+      })();
+      const fillType = localStorage.getItem("fill-type");
+      const aspectRatio = (() => {
+        try {
+          return fillType === "square" ? 1 : paperSize.width / paperSize.height;
+        } catch (error) {
+          return 1;
+        }
+      })();
       let streamDetails;
 
       const addCanvasImageToElmBackground = (canvas, elm) => {
@@ -326,9 +361,15 @@
         elm.style.backgroundPosition = "center";
       };
 
+      const streamDetailsElm = document.getElementById("stream-details");
+      const devSettingsElm = document.getElementById("dev-settings");
+      const devStatusesSection = document.getElementById(
+        "dev-statuses-section"
+      );
       const successMessageSection = document.getElementById(
         "success-message-section"
       );
+      const errorDetailsElm = document.getElementById("error-details");
       const errorMessageSection = document.getElementById(
         "error-message-section"
       );
@@ -342,8 +383,15 @@
       const streamSection = document.getElementById("stream-section");
       const flashElm = document.getElementById("flash");
 
+      const selectedImageContainer = document.getElementById(
+        "selected-image-container"
+      );
+
       const imageSelectionInstructionsSection = document.getElementById(
         "image-selection-instructions-section"
+      );
+      const selectedImageContainerInstructions = document.getElementById(
+        "selected-image-container-instructions"
       );
       const imageSelectedSection = document.getElementById(
         "image-selected-section"
@@ -381,6 +429,7 @@
         if (status === "PENDING_INITIALIZATION") {
         }
         if (status === "INITIALIZING") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
@@ -392,9 +441,10 @@
           hide(imageSelectedSection);
           hide(confirmImageSection);
           hide(capturedImagesSection);
-          show(qrSection);
+          hide(qrSection);
         }
         if (status === "READY") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
@@ -406,9 +456,10 @@
           hide(imageSelectedSection);
           hide(confirmImageSection);
           hide(capturedImagesSection);
-          show(qrSection);
+          hide(qrSection);
         }
         if (status === "CAPTURING") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           show(countdownText);
           hide(successMessageSection);
@@ -423,6 +474,7 @@
           hide(qrSection);
         }
         if (status === "UNSELECTED") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           hide(countdownText);
           hide(successMessageSection);
@@ -437,6 +489,7 @@
           hide(qrSection);
         }
         if (status === "SELECTED") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = false;
           hide(countdownText);
           hide(successMessageSection);
@@ -451,6 +504,7 @@
           hide(qrSection);
         }
         if (status === "SUCCESS") {
+          errorDetailsElm.innerHTML = "";
           printImageButton.disabled = true;
           show(successMessageSection);
           hide(errorMessageSection);
@@ -486,18 +540,39 @@
         });
       };
 
-      const getStreamDetails = async () => {
+      const getMaxVideoMediaDimensions = async ({ aspectRatio, ideal }) => {
+        const videoMedia = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { width: { ideal }, height: { ideal }, ratio: aspectRatio },
+        });
+
+        const settings = videoMedia
+          .getVideoTracks()
+          .find((x) => !!x)
+          .getSettings();
+
+        const wMax = settings.width;
+        const hMax = settings.height;
+
+        if (wMax / aspectRatio <= hMax) {
+          const rtn = { width: wMax, height: wMax / aspectRatio };
+          return rtn;
+        }
+        if (hMax * aspectRatio <= wMax) {
+          const rtn = { width: hMax * aspectRatio, height: hMax };
+          return rtn;
+        }
+      };
+
+      const getStreamDetails = async ({ width, height }) => {
         let streamData;
         try {
           streamData = await navigator.mediaDevices.getUserMedia({
             audio: false,
-            video: {
-              width: { min: 576, ideal: 1080, max: 1080 },
-              height: { min: 576, ideal: 1080, max: 1080 },
-            },
+            video: { width: { ideal: width }, height: { ideal: height } },
           });
         } catch (e) {
-          console.log(e);
+          console.error(e);
           window.alert(`Can't connect to webcam right now...`);
         }
 
@@ -506,11 +581,14 @@
           .find((x) => !!x)
           .getSettings();
 
-        return {
+        const details = {
           data: streamData,
           width: settings.width,
           height: settings.height,
         };
+
+        streamDetailsElm.innerHTML = JSON.stringify(details, undefined, 2);
+        return details;
       };
 
       const setupStream = () => {
@@ -529,10 +607,19 @@
         }
       };
       const setupSelectedImageCanvas = () => {
+        show(selectedImageContainerInstructions);
         const context = selectedImageCanvas.getContext("2d");
         const { width, height } = streamDetails;
         selectedImageCanvas.width = width;
         selectedImageCanvas.height = height;
+
+        const height1 = selectedImageContainer.style.height;
+        const height1Units = height1.match(/[a-zA-Z]+/g);
+        const height1Value = parseInt(height1.match(/\d+/g));
+
+        const width1Value = parseInt(height1Value * 10 * aspectRatio) / 10;
+
+        selectedImageContainer.style.width = `${width1Value}${height1Units}`;
       };
 
       const handleSelectImage = (newCanvas, oldCanvas) => {
@@ -544,7 +631,7 @@
 
       const removeSelectImageEvents = () => {
         selectImageEventDetails.forEach(({ event, elm }, j) => {
-          elm.removeEventListener("click", event);
+          elm.removeEventListener(clickEventName, event);
         });
         selectImageEventDetails = [];
       };
@@ -555,9 +642,10 @@
           const event = () => {
             handleSelectImage(selectedImageCanvas, captureCanvas);
             printImageButton.disabled = false;
+            hide(selectedImageContainerInstructions);
             onSelectImage();
           };
-          captureCanvas.parentElement.addEventListener("click", event);
+          captureCanvas.parentElement.addEventListener(clickEventName, event);
           selectImageEventDetails.push({
             event,
             elm: captureCanvas.parentElement,
@@ -578,19 +666,31 @@
         return;
       };
 
+      const getSettings = () => {
+        const baseUrl = localStorage.getItem("base-url");
+        return { baseUrl };
+      };
+
       const sendSelectedImage = async (e) => {
         e.preventDefault();
         try {
-          const resp = await fetch("http://localhost:3000/save-square-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
-          });
+          const controller = new AbortController();
+          setTimeout(() => controller.abort(), 3000);
+          const resp = await fetch(
+            `${getSettings().baseUrl ?? "./"}save-pdf-print-image`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image: selectedImageCanvas.toDataURL() }),
+              signal: controller.signal,
+            }
+          );
           const json = await resp.json();
           if (json.success === true) setStatus("SUCCESS");
           else setStatus("FAIL");
         } catch (error) {
-          console.log(error);
+          console.log(error.name);
+          errorDetailsElm.innerHTML = error.name;
           setStatus("FAIL");
         }
       };
@@ -633,9 +733,11 @@
       };
 
       const reInit = () => {
+        window.removeEventListener(clickEventName, setupCaptureImagesEvent);
+        window.addEventListener(clickEventName, setupCaptureImagesEvent);
+
         removeSelectImageEvents();
 
-        setupStream();
         setupCaptureCanvases();
         setupSelectedImageCanvas();
 
@@ -651,24 +753,41 @@
         }
       };
 
+      const getDevSettings = () => {
+        const baseUrl = localStorage.getItem("base-url");
+        const isRapid = localStorage.getItem("is-rapid") === "true";
+        const paperSize = localStorage.getItem("paper-size");
+        const fillType = localStorage.getItem("fill-type");
+        return { baseUrl, isRapid, paperSize, fillType };
+      };
+      const displayDevSettings = () => {
+        const devSettings = getDevSettings();
+        devSettingsElm.innerHTML = JSON.stringify(devSettings, undefined, 2);
+      };
+
       const init = async () => {
         setStatus("INITIALIZING");
+        const maxVideoMediaDimensions = await getMaxVideoMediaDimensions({
+          aspectRatio,
+          ideal: 1080,
+        });
 
-        streamDetails = await getStreamDetails();
+        streamDetails = await getStreamDetails(maxVideoMediaDimensions);
+        setupStream();
+        displayDevSettings();
+        hide(devStatusesSection);
 
-        window.removeEventListener("click", setupCaptureImagesEvent);
-        window.addEventListener("click", setupCaptureImagesEvent);
         reInit();
       };
 
       init();
     </script>
 
-    <script src="/service-worker.js"></script>
+    <script src="./service-worker.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker
-          .register("/service-worker.js")
+          .register("./service-worker.js")
           .then((registration) => {
             console.log(
               "Service Worker registered with scope:",

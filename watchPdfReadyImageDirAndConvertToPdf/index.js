@@ -29,9 +29,10 @@ const main = async () => {
     .on("all", async (event, imagePath) => {
       if (isReady && event === "add") {
         const imageName = getFileNameFromFilePath(imagePath);
-        const pdfPath = `../files/pdfs/${imageName}.pdf`;
+        const pdfReadyImagePath = `../files/pdfs/${imageName}.pdf`;
+        console.log(`pdf-ready image converted to pdf: ${pdfReadyImagePath}`);
 
-        imageToPdf(imagePath, pdfPath);
+        imageToPdf(imagePath, pdfReadyImagePath);
       }
     });
 };

@@ -39,15 +39,12 @@ const convertSquareImageToPdfReadyImage = async (
       background: { r: 255, g: 255, b: 255, alpha: 1 }, // blue background
     })
     .toFile(pdfReadyImagePath, async (err, info) => {
-      console.log(info);
       if (err) {
         console.error(err);
       } else {
         console.log(
-          `Image successfully processed and saved to ${pdfReadyImagePath}`
+          `Square image converted to pdf-ready: ${pdfReadyImagePath}`
         );
-        const newImageDimensions = await getImageDimensions(pdfReadyImagePath);
-        console.log(newImageDimensions);
       }
     });
 };

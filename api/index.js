@@ -1,63 +1,37 @@
 const express = require("express");
-const fs = require("fs").promises;
+const fs = require("fs");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const sharp = require("sharp");
+const https = require("https");
+const handlers = require("./handlers/index");
 
-const port = 3000;
+const port = 3005;
 const app = express();
+
+const privateKey = fs.readFileSync("server.key", "utf8");
+const certificate = fs.readFileSync("server.crt", "utf8");
+const credentials = { key: privateKey, cert: certificate };
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "500mb" }));
 
-const getImageDataFromImageDataUrl = (imageDataUrl) => {
-  return imageDataUrl.split(";base64,")[1];
-};
+app.use(express.static("../interfaceLocal/dist"));
 
-const getImageDimensionsFromImageDataUrl = (imageDataUrl) => {
-  return new Promise(async (resolve) => {
-    const imageData = getImageDataFromImageDataUrl(imageDataUrl);
+app.get("/ping", handlers.ping);
+app.post("/save-square-image", handlers.saveSquareImageHandler);
 
-    const buffer = Buffer.from(imageData, "base64");
+app.post("/save-pdf-print-image", handlers.savePdfPrintImageHandler);
+app.post("/save-pdf-print-6x4-image", handlers.savePdfPrint6x4ImageHandler);
 
-    const metadata = await sharp(buffer).metadata();
-    const imgDims = {
-      width: metadata.width,
-      height: metadata.height,
-      ratio: metadata.height / metadata.width,
-    };
+app.post(
+  "/resize-save-pdf-print-image",
+  handlers.resizeSavePdfPrintImageHandler
+);
 
-    resolve(imgDims);
-  });
-};
+// Create HTTPS server
+const httpsServer = https.createServer(credentials, app);
 
-app.post("/save-square-image", async (req, res) => {
-  const imageDataUrl = req.body.image;
-  const imageDimensions = await getImageDimensionsFromImageDataUrl(
-    imageDataUrl
-  );
-
-  const isSquare = imageDimensions.ratio > 0.9 || imageDimensions.ratio < 1.1;
-  if (!isSquare)
-    return res
-      .status(500)
-      .json({ success: false, message: "Image is not square" });
-
-  const imageData = getImageDataFromImageDataUrl(imageDataUrl);
-  const imageName = `../files/squareImages/${new Date().toISOString()}.png`;
-
-  try {
-    await fs.writeFile(imageName, imageData, "base64");
-    console.log(`${imageName} uploaded successfully`);
-    res
-      .status(200)
-      .json({ success: true, message: "File uploaded successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Error writing the file" });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+// Start the server
+httpsServer.listen(port, () => {
+  console.log(`Server running on https://localhost:${port}`);
 });
