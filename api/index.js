@@ -15,7 +15,8 @@ const credentials = { key: privateKey, cert: certificate };
 app.use(cors());
 app.use(bodyParser.json({ limit: "500mb" }));
 
-app.use(express.static("../interfaceLocal/dist"));
+// app.use(express.static("../interfaceLocal/dist"));
+app.use(express.static("../../pi-guestbook-stencil-web-components/www"));
 
 app.get("/ping", handlers.ping);
 app.post("/save-square-image", handlers.saveSquareImageHandler);
