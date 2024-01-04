@@ -1,6 +1,7 @@
 const sharp = require("sharp");
 const fs = require("fs");
 const fsPromises = fs.promises;
+const base64 = require("base64-js");
 const { exec } = require("child_process");
 
 const imgToPDF = require("image-to-pdf");
@@ -21,6 +22,9 @@ const imageToPdf = async (imagePath, pdfPath, options = {}) => {
 };
 
 const getImageDataFromImageDataUrl = (imageDataUrl) => {
+  return imageDataUrl.split(";base64,")[1];
+};
+const getBase64ImageDataFromImageDataUrl = (imageDataUrl) => {
   return imageDataUrl.split(";base64,")[1];
 };
 
@@ -72,12 +76,65 @@ const print = (pdfPath) => {
   console.log(cmd);
   exc(cmd);
 };
+const getFilePathsInDirectory = async (directoryPath) => {
+  return new Promise((resolve, reject) => {
+    fs.readdir(directoryPath, (err, files) => {
+      if (err) return console.error("Error reading folder:", err);
+
+      resolve(files.map((file) => `${directoryPath}${file}`));
+    });
+  });
+};
+
+const getPngImageFilePathsInDirectory = async (directoryPath) => {
+  const filePaths = await getFilePathsInDirectory(directoryPath);
+  const pngImageFilePaths = filePaths.filter(
+    (x) => x.split(".").slice(-1)[0].toLowerCase() === "png"
+  );
+  return pngImageFilePaths;
+};
+const getImageDataUrlFromPngFilePath = (pngFilePath) => {
+  const imageBuffer = fs.readFileSync(pngFilePath);
+  const base64String = base64.fromByteArray(imageBuffer);
+  const imageDataUrl = `data:image/jpeg;base64,${base64String}`;
+  return imageDataUrl;
+};
+
+const getImageDataUrlsFromDirectory = async (directoryPath) => {
+  const pngImageFilePaths = await getPngImageFilePathsInDirectory(
+    directoryPath
+  );
+  return pngImageFilePaths.map((filePath) =>
+    getImageDataUrlFromPngFilePath(filePath)
+  );
+};
+
+const getDirectoryNamesInDirectory = (directoryPath) => {
+  try {
+    const fileNamesAndDirectoryNames = fs.readdirSync(directoryPath);
+
+    const directoryNames = fileNamesAndDirectoryNames.filter((fileOrDir) => {
+      const stat = fs.statSync(`${directoryPath}${fileOrDir}`);
+      return stat.isDirectory();
+    });
+
+    console.log("List of directories:", directoryNames);
+    return directoryNames;
+  } catch (err) {
+    console.error("Error reading directory:", err);
+  }
+};
 
 module.exports = {
   imageToPdf,
   getImageDataFromImageDataUrl,
+  getBase64ImageDataFromImageDataUrl,
   getImageDimensionsFromImageDataUrl,
   saveImageFromImageData,
   exc,
   print,
+  getFilePathsInDirectory,
+  getPngImageFilePathsInDirectory,
+  getImageDataUrlsFromDirectory,
+  getDirectoryNamesInDirectory,
 };

@@ -24,6 +24,10 @@ app.post("/save-square-image", handlers.saveSquareImageHandler);
 app.post("/save-pdf-print-image", handlers.savePdfPrintImageHandler);
 app.post("/save-pdf-print-6x4-image", handlers.savePdfPrint6x4ImageHandler);
 
+app.post("/backup-images", handlers.backupImagesHandler);
+app.post("/get-backup-images", handlers.getBackupImagesHandler);
+app.get("/get-backup-images-list", handlers.getBackupImagesListHandler);
+
 app.post(
   "/resize-save-pdf-print-image",
   handlers.resizeSavePdfPrintImageHandler
