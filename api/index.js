@@ -8,6 +8,30 @@ const handlers = require("./handlers/index");
 const port = 3005;
 const app = express();
 
+const safeCreateDir = (directoryPath) => {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(directoryPath)) return resolve(true);
+    fs.mkdir(directoryPath, (err) => {
+      if (err) {
+        console.error("Error creating folder:", err);
+        resolve(false);
+      } else {
+        console.log("Folder created successfully!");
+        resolve(true);
+      }
+    });
+  });
+};
+const init = async () => {
+  await safeCreateDir("../files");
+  await safeCreateDir("../files/backup-images");
+  await safeCreateDir("../files/keep");
+  await safeCreateDir("../files/pdfReadyImages");
+  await safeCreateDir("../files/pdfs");
+  await safeCreateDir("../files/squareImages");
+};
+init();
+
 const privateKey = fs.readFileSync("server.key", "utf8");
 const certificate = fs.readFileSync("server.crt", "utf8");
 const credentials = { key: privateKey, cert: certificate };

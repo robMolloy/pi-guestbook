@@ -94,7 +94,6 @@ const backupImagesHandler = async (req, res) => {
 };
 
 const getBackupImagesListHandler = async (req, res) => {
-  console.log("list");
   const directoryPath = `../files/backup-images/`;
   const directoryNames = getDirectoryNamesInDirectory(directoryPath).sort(
     (a, b) => (a > b ? -1 : 1)

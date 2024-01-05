@@ -140,7 +140,6 @@ const getDirectoryNamesInDirectory = (directoryPath) => {
       return stat.isDirectory();
     });
 
-    console.log("List of directories:", directoryNames);
     return directoryNames;
   } catch (err) {
     console.error("Error reading directory:", err);
