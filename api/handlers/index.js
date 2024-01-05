@@ -7,6 +7,7 @@ const {
   print,
   getImageDataUrlsFromDirectory,
   getDirectoryNamesInDirectory,
+  cmd,
 } = require("../helpers/index");
 const sharp = require("sharp");
 const fs = require("fs");
@@ -110,6 +111,11 @@ const getBackupImagesHandler = async (req, res) => {
   return res.json(response);
 };
 
+const getPrintQueueHandler = async (req, res) => {
+  const response = await cmd("lpq");
+  return res.json(response);
+};
+
 const resizeSavePdfPrintImageHandler = async (req, res) => {
   const imageDataUrl = req.body.image;
   const data = Buffer.from(imageDataUrl.split(",")[1], "base64");
@@ -154,5 +160,6 @@ module.exports = {
   savePdfPrint6x4ImageHandler,
   getBackupImagesListHandler,
   getBackupImagesHandler,
+  getPrintQueueHandler,
   resizeSavePdfPrintImageHandler,
 };

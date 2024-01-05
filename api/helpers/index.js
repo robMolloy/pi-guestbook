@@ -71,6 +71,28 @@ const exc = (x) => {
   });
 };
 
+const cmd = async (command) => {
+  const response = await new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error: ${error.message}`);
+        resolve({ success: false, data: error.message });
+        return;
+      }
+
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        resolve({ success: false, data: stderr });
+        return;
+      }
+
+      resolve({ success: true, data: stdout });
+    });
+  });
+
+  return response;
+};
+
 const print = (pdfPath) => {
   const cmd = `lp ${pdfPath}`;
   console.log(cmd);
@@ -132,6 +154,7 @@ module.exports = {
   getImageDimensionsFromImageDataUrl,
   saveImageFromImageData,
   exc,
+  cmd,
   print,
   getFilePathsInDirectory,
   getPngImageFilePathsInDirectory,

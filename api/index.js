@@ -27,6 +27,7 @@ app.post("/save-pdf-print-6x4-image", handlers.savePdfPrint6x4ImageHandler);
 app.post("/backup-images", handlers.backupImagesHandler);
 app.post("/get-backup-images", handlers.getBackupImagesHandler);
 app.get("/get-backup-images-list", handlers.getBackupImagesListHandler);
+app.get("/get-print-queue", handlers.getPrintQueueHandler);
 
 app.post(
   "/resize-save-pdf-print-image",
