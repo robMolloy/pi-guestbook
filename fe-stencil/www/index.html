@@ -1,0 +1,10 @@
+<!doctype html><html dir="ltr" lang="en" data-theme="cupcake"><head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"> <title>pi guestbook</title> <!-- <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet" type="text/css" /> --> <link href="./build/my-first-stencil-comp.css" rel="stylesheet" type="text/css"> <script type="module" src="/build/my-first-stencil-comp.esm.js" data-stencil></script> <script nomodule="" src="/build/my-first-stencil-comp.js" data-stencil></script> </head> <body> <root-component></root-component> <script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  // auto-unregister service worker during dev mode
+  navigator.serviceWorker.getRegistration().then(function(registration) {
+    if (registration) {
+      registration.unregister().then(function() { location.reload(true) });
+    }
+  });
+}
+</script></body></html>
