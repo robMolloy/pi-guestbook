@@ -75,8 +75,6 @@ const savePdfPrint6x4ImageHandler = async (req, res) => {
 };
 
 const backupImagesHandler = async (req, res) => {
-  console.log(`index.js:${/*LL*/ 74}`, { asd: 123 });
-
   const imageDataUrls = req.body.imageDataUrls;
   const isoStringDate = new Date().toISOString();
   const folderPath = `../files/backup-images/${isoStringDate}/`;

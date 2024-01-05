@@ -45,6 +45,21 @@ const getImageDimensionsFromImageDataUrl = (imageDataUrl) => {
   });
 };
 
+const safeCreateDir = (directoryPath) => {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(directoryPath)) return resolve(true);
+    fs.mkdir(directoryPath, (err) => {
+      if (err) {
+        console.error("Error creating folder:", err);
+        resolve(false);
+      } else {
+        console.log("Folder created successfully!");
+        resolve(true);
+      }
+    });
+  });
+};
+
 const saveImageFromImageData = async (imagePath, imageData) => {
   try {
     await fsPromises.writeFile(imagePath, imageData, "base64");
@@ -159,4 +174,5 @@ module.exports = {
   getPngImageFilePathsInDirectory,
   getImageDataUrlsFromDirectory,
   getDirectoryNamesInDirectory,
+  safeCreateDir,
 };
