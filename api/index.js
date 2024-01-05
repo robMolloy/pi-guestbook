@@ -25,7 +25,6 @@ const safeCreateDir = (directoryPath) => {
 const init = async () => {
   await safeCreateDir("../files");
   await safeCreateDir("../files/backup-images");
-  await safeCreateDir("../files/keep");
   await safeCreateDir("../files/pdfReadyImages");
   await safeCreateDir("../files/pdfs");
   await safeCreateDir("../files/squareImages");
