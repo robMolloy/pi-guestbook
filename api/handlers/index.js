@@ -8,6 +8,7 @@ const {
   getImageDataUrlsFromDirectory,
   getDirectoryNamesInDirectory,
   cmd,
+  getAvailableDiskSpace,
 } = require("../helpers/index");
 const sharp = require("sharp");
 const fs = require("fs");
@@ -113,6 +114,12 @@ const getPrintQueueHandler = async (req, res) => {
   return res.json(response);
 };
 
+const getAvailableDiskSpaceHandler = async (req, res) => {
+  const diskSpace = await getAvailableDiskSpace();
+  console.log(`index.js:${/*LL*/ 119}`, { diskSpace });
+  return res.send(diskSpace);
+};
+
 const resizeSavePdfPrintImageHandler = async (req, res) => {
   const imageDataUrl = req.body.image;
   const data = Buffer.from(imageDataUrl.split(",")[1], "base64");
@@ -159,4 +166,5 @@ module.exports = {
   getBackupImagesHandler,
   getPrintQueueHandler,
   resizeSavePdfPrintImageHandler,
+  getAvailableDiskSpaceHandler,
 };

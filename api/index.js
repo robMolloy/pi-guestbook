@@ -27,7 +27,7 @@ const init = async () => {
   app.use(bodyParser.json({ limit: "500mb" }));
 
   // app.use(express.static("../interfaceLocal/dist"));
-  app.use(express.static("../../pi-guestbook-stencil-web-components/www"));
+  app.use(express.static("../fe-stencil/www"));
 
   app.get("/ping", handlers.ping);
   app.post("/save-square-image", handlers.saveSquareImageHandler);
@@ -39,6 +39,7 @@ const init = async () => {
   app.post("/get-backup-images", handlers.getBackupImagesHandler);
   app.get("/get-backup-images-list", handlers.getBackupImagesListHandler);
   app.get("/get-print-queue", handlers.getPrintQueueHandler);
+  app.get("/get-available-disk-space", handlers.getAvailableDiskSpaceHandler);
 
   app.post(
     "/resize-save-pdf-print-image",

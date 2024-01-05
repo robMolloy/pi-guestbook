@@ -90,3 +90,25 @@ export const retrievePrintQueue = async () => {
     return { success: false } as const;
   }
 };
+
+export const retrieveAvailableDiskSpace = async () => {
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 3000);
+
+    const response = await fetch(`${localStorage.getItem('serverBaseUrl')}get-available-disk-space`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    const parseResponse = z.string().safeParse(text);
+    return parseResponse.success
+      ? ({ success: true, data: `Available disk space: ${parseResponse.data}` } as const)
+      : ({ success: false, data: 'Available disk space does not match expected data structure' } as const);
+  } catch (e) {
+    console.error(`sendImageDataUrlToPrint.ts:${/*LL*/ 105}`, { e });
+
+    return { success: false } as const;
+  }
+};

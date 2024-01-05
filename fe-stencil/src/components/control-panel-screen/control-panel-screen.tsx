@@ -1,5 +1,5 @@
 import { Component, h, State } from '@stencil/core';
-import { retrieveBackupImageDataUrls, retrieveBackupImageList, retrievePrintQueue, sendImageDataUrlToPrint } from '../../utils';
+import { retrieveAvailableDiskSpace, retrieveBackupImageDataUrls, retrieveBackupImageList, retrievePrintQueue, sendImageDataUrlToPrint } from '../../utils';
 
 @Component({
   tag: 'control-panel-screen',
@@ -10,6 +10,7 @@ export class ViewBackupsScreen {
   @State() imageListStatus: 'loading' | 'error' | 'loaded' = 'loading';
   @State() imageList: { [k: string]: string[] | undefined } = {};
   @State() printQueue: string = '';
+  @State() availableDiskSpace: string = '';
 
   displayImageListFromImageListResponse = (imageListResponse: { data: string[] }) => {
     const imageList = {};
@@ -26,12 +27,17 @@ export class ViewBackupsScreen {
 
       const printQueueResponse = await retrievePrintQueue();
       this.printQueue = printQueueResponse.success ? printQueueResponse.data : 'could not find the print queue data...';
+
+      const availableDiskSpace = await retrieveAvailableDiskSpace();
+      this.availableDiskSpace = availableDiskSpace.success ? availableDiskSpace.data : 'available disk space does not match expected data structure';
     })();
   }
 
   render() {
     return (
       <div>
+        <global-h2>Available disk space</global-h2>
+        {this.availableDiskSpace}
         <global-h2>Print queue</global-h2>
         {this.printQueue}
         <global-h2>Image list</global-h2>

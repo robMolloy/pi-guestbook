@@ -24,6 +24,15 @@ const imageToPdf = async (imagePath, pdfPath, options = {}) => {
 const getImageDataFromImageDataUrl = (imageDataUrl) => {
   return imageDataUrl.split(";base64,")[1];
 };
+
+const getAvailableDiskSpace = async () => {
+  const cmdResp = await cmd("df -h /");
+  console.log(`index.js:${/*LL*/ 30}`, { cmdResp });
+
+  if (cmdResp.success !== true) return;
+  const rtn = cmdResp.data.split("\n")[1].split(/\s+/)[3];
+  return rtn;
+};
 const getBase64ImageDataFromImageDataUrl = (imageDataUrl) => {
   return imageDataUrl.split(";base64,")[1];
 };
@@ -175,4 +184,5 @@ module.exports = {
   getImageDataUrlsFromDirectory,
   getDirectoryNamesInDirectory,
   safeCreateDir,
+  getAvailableDiskSpace,
 };
