@@ -1,10 +1,21 @@
 import { z } from 'zod';
 
+const getUrls = () => {
+  return {
+    serverPrintImageEndpoint: `${localStorage.getItem('serverBaseUrl')}${localStorage.getItem('serverPrintImageEndpoint')}`,
+    serverBackupImagesEndpoint: `${localStorage.getItem('serverBaseUrl')}${localStorage.getItem('serverBackupImagesEndpoint')}`,
+    getBackupImagesEndPoint: `${localStorage.getItem('serverBaseUrl')}get-backup-images`,
+    getBackupImagesList: `${localStorage.getItem('serverBaseUrl')}get-backup-images-list`,
+    getPrintQueue: `${localStorage.getItem('serverBaseUrl')}get-print-queue`,
+    getAvailableDiskSpace: `${localStorage.getItem('serverBaseUrl')}get-available-disk-space`,
+  };
+};
+
 export const sendImageDataUrlToPrint = async (p: { imageDataUrl: string }) => {
   try {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 3000);
-    const resp = await fetch(`${localStorage.getItem('serverBaseUrl')}${localStorage.getItem('serverPrintImageEndpoint')}`, {
+    const resp = await fetch(getUrls().serverPrintImageEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: p.imageDataUrl }),
@@ -22,7 +33,7 @@ export const sendImageDataUrlsForBackup = async (p: { imageDataUrls: string[] })
   try {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 3000);
-    const resp = await fetch(`${localStorage.getItem('serverBaseUrl')}${localStorage.getItem('serverBackupImagesEndpoint')}`, {
+    const resp = await fetch(getUrls().serverBackupImagesEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageDataUrls: p.imageDataUrls }),
@@ -41,7 +52,7 @@ export const retrieveBackupImageDataUrls = async (k: string) => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch(`${localStorage.getItem('serverBaseUrl')}get-backup-images`, {
+    const response = await fetch(getUrls().getBackupImagesEndPoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ backupImageDirectory: k }),
@@ -59,7 +70,7 @@ export const retrieveBackupImageList = async () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch(`${localStorage.getItem('serverBaseUrl')}get-backup-images-list`, {
+    const response = await fetch(getUrls().getBackupImagesList, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
@@ -76,7 +87,7 @@ export const retrievePrintQueue = async () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch(`${localStorage.getItem('serverBaseUrl')}get-print-queue`, {
+    const response = await fetch(getUrls().getPrintQueue, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
@@ -96,7 +107,7 @@ export const retrieveAvailableDiskSpace = async () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch(`${localStorage.getItem('serverBaseUrl')}get-available-disk-space`, {
+    const response = await fetch(getUrls().getAvailableDiskSpace, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
