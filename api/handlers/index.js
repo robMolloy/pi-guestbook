@@ -49,8 +49,6 @@ const savePdfPrintImageHandler = async (req, res) => {
 
   await imageToPdf(imageDataUrl, pdfPath);
 
-  await delay(2000);
-
   try {
     print(pdfPath);
   } catch (error) {
@@ -66,6 +64,7 @@ const savePdfPrint6x4ImageHandler = async (req, res) => {
   const pdfPath = `../files/pdfs/${new Date().toISOString()}.pdf`;
 
   await imageToPdf(imageDataUrl, pdfPath);
+  await delay(10000);
   console.log({ pdfPath });
 
   try {
