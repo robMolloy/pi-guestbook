@@ -118,7 +118,7 @@ const cmd = async (command) => {
 };
 
 const print = (pdfPath) => {
-  const cmd = `lp -o landscape -o fit-to-page -o media=oe_photo-l_3.5x5in ${pdfPath}`;
+  const cmd = `lp -o landscape -o fit-to-page -o media=na_index-4x6_4x6in ${pdfPath}`;
   console.log(cmd);
   exc(cmd);
 };
