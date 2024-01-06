@@ -63,18 +63,23 @@ const savePdfPrint6x4ImageHandler = async (req, res) => {
   const imageDataUrl = req.body.image;
   const pdfPath = `../files/pdfs/${new Date().toISOString()}.pdf`;
 
-  await imageToPdf(imageDataUrl, pdfPath);
-  await delay(2000);
-  console.log({ pdfPath });
+  if (true) {
+    imageToPdf(imageDataUrl, pdfPath);
+    return res.json({ success: true, message: "success" });
+  } else {
+    await imageToPdf(imageDataUrl, pdfPath);
+    await delay(2000);
+    console.log({ pdfPath });
 
-  try {
-    print(pdfPath);
-  } catch (error) {
-    console.log("error");
-    return res.status(500).json({ success: false, message: "can't print" });
+    try {
+      print(pdfPath);
+    } catch (error) {
+      console.log("error");
+      return res.status(500).json({ success: false, message: "can't print" });
+    }
+
+    return res.json({ success: true, message: "success" });
   }
-
-  return res.json({ success: true, message: "success" });
 };
 
 const backupImagesHandler = async (req, res) => {
