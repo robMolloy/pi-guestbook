@@ -1,41 +1,37 @@
 import { Component, Element, h, Listen, State } from '@stencil/core';
 
 // const getMaxVideoMediaDimensions = async (p: { aspectRatio: number; ideal: number }) => {
-const getMaxVideoMediaDimensions = async () => {
-  // const videoMedia = await navigator.mediaDevices.getUserMedia({
-  //   audio: false,
-  //   video: { width: { ideal: p.ideal }, height: { ideal: p.ideal } },
-  // });
+// const getMaxVideoMediaDimensions = async () => {
+//   // const videoMedia = await navigator.mediaDevices.getUserMedia({
+//   //   audio: false,
+//   //   video: { width: { ideal: p.ideal }, height: { ideal: p.ideal } },
+//   // });
 
-  // const tracks = videoMedia.getVideoTracks();
-  // const settings = tracks.find(x => !!x).getSettings();
+//   // const tracks = videoMedia.getVideoTracks();
+//   // const settings = tracks.find(x => !!x).getSettings();
 
-  // // const wMax = settings.width;
-  // // const hMax = settings.height;
-  // // // const { width, height } = (() => {
-  // // //   if (wMax / p.aspectRatio <= hMax) return { width: wMax, height: wMax / p.aspectRatio };
-  // // //   if (hMax * p.aspectRatio <= wMax) return { width: hMax * p.aspectRatio, height: hMax };
-  // // // })();
+//   // // const wMax = settings.width;
+//   // // const hMax = settings.height;
+//   // // // const { width, height } = (() => {
+//   // // //   if (wMax / p.aspectRatio <= hMax) return { width: wMax, height: wMax / p.aspectRatio };
+//   // // //   if (hMax * p.aspectRatio <= wMax) return { width: hMax * p.aspectRatio, height: hMax };
+//   // // // })();
 
-  // tracks.forEach(track => track.stop());
+//   // tracks.forEach(track => track.stop());
 
-  const rtn = {
-    audio: false,
-    video: { width: { ideal: 720 }, height: { ideal: 480 } },
-  };
+//   const rtn = {
+//     audio: false,
+//     video: { width: { ideal: 720 }, height: { ideal: 480 } },
+//   };
 
-  return rtn;
-};
+//   return rtn;
+// };
 
 const getStreamData = (p: {
   audio?: boolean;
   video: {
-    width: {
-      ideal: number;
-    };
-    height: {
-      ideal: number;
-    };
+    width: { ideal: number };
+    height: { ideal: number };
   };
 }): Promise<MediaProvider> => {
   return new Promise((resolve, reject) => {
@@ -121,9 +117,14 @@ export class RootComponent {
   constructor() {
     (async () => {
       // this.streamDims = await getMaxVideoMediaDimensions({ ideal: 1080, aspectRatio: 6 / 4 });
-      this.streamDims = await getMaxVideoMediaDimensions();
+      // this.streamDims = await getMaxVideoMediaDimensions();
 
-      window.streamData = await getStreamData(this.streamDims);
+      window.streamData = await getStreamData({
+        video: {
+          width: { ideal: 720 },
+          height: { ideal: 1080 },
+        },
+      });
       this.streamDataIsReady = true;
     })();
   }
@@ -136,12 +137,8 @@ export class RootComponent {
         {this.screenStatus === 'edit_settings_screen' && <edit-settings-screen />}
         {this.screenStatus === 'control_panel_screen' && <control-panel-screen />}
         {this.screenStatus === 'start_guestbook_screen' && !this.streamDataIsReady && <loading-guestbook-screen />}
-        {this.screenStatus === 'start_guestbook_screen' && this.streamDataIsReady && (
-          <start-guestbook-screen width={this.streamDims?.video?.width?.ideal} height={this.streamDims?.video?.height?.ideal} />
-        )}
-        {this.screenStatus === 'capture_countdown_screen' && (
-          <capture-countdown-screen width={this.streamDims?.video?.width?.ideal} height={this.streamDims?.video?.height?.ideal} />
-        )}
+        {this.screenStatus === 'start_guestbook_screen' && this.streamDataIsReady && <start-guestbook-screen width={1080} height={720} />}
+        {this.screenStatus === 'capture_countdown_screen' && <capture-countdown-screen width={1080} height={720} />}
         {this.screenStatus === 'print_photo_success_screen' && <print-photo-success-screen />}
         {this.screenStatus === 'print_photo_fail_screen' && <print-photo-fail-screen error={this.sendPhotoErrorName} />}
       </div>
