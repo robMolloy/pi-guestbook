@@ -22,7 +22,7 @@ const exc = (x) => {
 };
 
 const print = (pdfPath) => {
-  const cmd = `lp ${pdfPath}`;
+  const cmd = `lp -o landscape -o fit-to-page -o media=oe_photo-l_3.5x5in ${pdfPath}`;
   console.log(cmd);
   exc(cmd);
 };
