@@ -1,4 +1,5 @@
 import { Component, h, Event, EventEmitter, State } from '@stencil/core';
+import { getUrls } from '../../utils';
 import { getServerLiveStatus } from '../../utils/fetchUtils/getServerLiveStatus';
 import { getSettingsFromLocalStorage, paperSizeTranslator, setSettingsInLocalStorage } from '../../utils/settings/settings';
 
@@ -40,7 +41,7 @@ export class EditSettingsScreen {
       serverBackupImagesEndpoint: stats.backupImagesEndpoint,
     });
 
-    this.settings = getSettingsFromLocalStorage();
+    this.settings = { ...getSettingsFromLocalStorage(), ...getUrls() };
   }
 
   constructor() {
