@@ -1,26 +1,26 @@
 import { Component, Element, h, Listen, State } from '@stencil/core';
 
 const getMaxVideoMediaDimensions = async (p: { aspectRatio: number; ideal: number }) => {
-  const videoMedia = await navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: { width: { ideal: p.ideal }, height: { ideal: p.ideal } },
-  });
+  // const videoMedia = await navigator.mediaDevices.getUserMedia({
+  //   audio: false,
+  //   video: { width: { ideal: p.ideal }, height: { ideal: p.ideal } },
+  // });
 
-  const tracks = videoMedia.getVideoTracks();
-  const settings = tracks.find(x => !!x).getSettings();
+  // const tracks = videoMedia.getVideoTracks();
+  // const settings = tracks.find(x => !!x).getSettings();
 
-  const wMax = settings.width;
-  const hMax = settings.height;
-  const { width, height } = (() => {
-    if (wMax / p.aspectRatio <= hMax) return { width: wMax, height: wMax / p.aspectRatio };
-    if (hMax * p.aspectRatio <= wMax) return { width: hMax * p.aspectRatio, height: hMax };
-  })();
+  // // const wMax = settings.width;
+  // // const hMax = settings.height;
+  // // // const { width, height } = (() => {
+  // // //   if (wMax / p.aspectRatio <= hMax) return { width: wMax, height: wMax / p.aspectRatio };
+  // // //   if (hMax * p.aspectRatio <= wMax) return { width: hMax * p.aspectRatio, height: hMax };
+  // // // })();
 
-  tracks.forEach(track => track.stop());
+  // tracks.forEach(track => track.stop());
 
   const rtn = {
     audio: false,
-    video: { width: { ideal: width }, height: { ideal: height } },
+    video: { width: { ideal: 720 }, height: { ideal: 480 } },
   };
 
   return rtn;
