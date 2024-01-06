@@ -3,6 +3,8 @@ import { getUrls } from '../../utils';
 import { getServerLiveStatus } from '../../utils/fetchUtils/getServerLiveStatus';
 import { getSettingsFromLocalStorage, paperSizeTranslator, setSettingsInLocalStorage } from '../../utils/settings/settings';
 
+const getAllSettings = () => ({ ...getSettingsFromLocalStorage(), ...getUrls() });
+
 type TServerLiveStatus = 'uninitialised' | 'initialising' | 'awaiting_response' | 'no_base_url_provided' | 'server_not_found' | 'server_found' | 'server_found_invalid_response';
 
 @Component({
@@ -17,7 +19,7 @@ export class EditSettingsScreen {
   @State() serverLiveStatusColorIndicator: 'orange' | 'red' | 'green' = 'orange';
   @State() serverBaseUrl: string = localStorage.getItem('serverBaseUrl');
   @State() paperSizeKey: string = localStorage.getItem('paperSizeKey');
-  @State() settings: { [k: string]: string | number | null } = getSettingsFromLocalStorage();
+  @State() settings: { [k: string]: string | number | null } = getAllSettings();
 
   async handleServerLiveStatus() {
     this.serverLiveStatus = 'initialising';
@@ -41,7 +43,7 @@ export class EditSettingsScreen {
       serverBackupImagesEndpoint: stats.backupImagesEndpoint,
     });
 
-    this.settings = { ...getSettingsFromLocalStorage(), ...getUrls() };
+    this.settings = getAllSettings();
   }
 
   constructor() {
