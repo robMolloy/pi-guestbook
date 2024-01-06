@@ -11,13 +11,18 @@ const getMaxVideoMediaDimensions = async (p: { aspectRatio: number; ideal: numbe
 
   const wMax = settings.width;
   const hMax = settings.height;
-
-  const rtn = (() => {
+  const { width, height } = (() => {
     if (wMax / p.aspectRatio <= hMax) return { width: wMax, height: wMax / p.aspectRatio };
     if (hMax * p.aspectRatio <= wMax) return { width: hMax * p.aspectRatio, height: hMax };
   })();
 
   tracks.forEach(track => track.stop());
+
+  const rtn = {
+    audio: false,
+    video: { width: { ideal: width }, height: { ideal: height } },
+  };
+
   return rtn;
 };
 
