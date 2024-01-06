@@ -1,6 +1,12 @@
 const { exec } = require("child_process");
 const chokidar = require("chokidar");
 
+const delay = async (x) => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(true), x);
+  });
+};
+
 const exc = (x) => {
   exec(x, (error, stdout, stderr) => {
     if (error) {
@@ -31,6 +37,7 @@ const main = async () => {
     })
     .on("all", async (event, pdfPath) => {
       if (isReady && event === "add") {
+        await delay(10000);
         print(pdfPath);
       }
     });
