@@ -64,7 +64,7 @@ const savePdfPrint6x4ImageHandler = async (req, res) => {
   const pdfPath = `../files/pdfs/${new Date().toISOString()}.pdf`;
 
   await imageToPdf(imageDataUrl, pdfPath);
-  await delay(10000);
+  await delay(2000);
   console.log({ pdfPath });
 
   try {
