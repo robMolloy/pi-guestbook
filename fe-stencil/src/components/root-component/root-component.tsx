@@ -20,7 +20,7 @@ const getMaxVideoMediaDimensions = async (p: { aspectRatio: number; ideal: numbe
 
   const rtn = {
     audio: false,
-    video: { width: { ideal: 720 }, height: { ideal: 480 } },
+    video: { width: { ideal: 480 }, height: { ideal: 720 } },
   };
 
   return rtn;
