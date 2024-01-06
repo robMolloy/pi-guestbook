@@ -1,6 +1,7 @@
 import { Component, Element, h, Listen, State } from '@stencil/core';
 
-const getMaxVideoMediaDimensions = async (p: { aspectRatio: number; ideal: number }) => {
+// const getMaxVideoMediaDimensions = async (p: { aspectRatio: number; ideal: number }) => {
+const getMaxVideoMediaDimensions = async () => {
   // const videoMedia = await navigator.mediaDevices.getUserMedia({
   //   audio: false,
   //   video: { width: { ideal: p.ideal }, height: { ideal: p.ideal } },
@@ -20,16 +21,26 @@ const getMaxVideoMediaDimensions = async (p: { aspectRatio: number; ideal: numbe
 
   const rtn = {
     audio: false,
-    video: { width: { ideal: 480 }, height: { ideal: 720 } },
+    video: { width: { ideal: 720 }, height: { ideal: 480 } },
   };
 
   return rtn;
 };
 
-const getStreamData = (p: { width: number; height: number }): Promise<MediaProvider> => {
+const getStreamData = (p: {
+  audio?: boolean;
+  video: {
+    width: {
+      ideal: number;
+    };
+    height: {
+      ideal: number;
+    };
+  };
+}): Promise<MediaProvider> => {
   return new Promise((resolve, reject) => {
     navigator.mediaDevices
-      .getUserMedia({ video: { width: { ideal: p.width }, height: { ideal: p.height } } })
+      .getUserMedia({ video: { width: { ideal: p.video.width.ideal }, height: { ideal: p.video.height.ideal } } })
       .then(function (initStream) {
         const stream = initStream as unknown as MediaProvider;
         resolve(stream);
@@ -62,7 +73,19 @@ declare global {
 })
 export class RootComponent {
   @State() screenStatus: TScreenStatus = 'init_screen';
-  @State() streamDims: { width: number; height: number } | undefined = undefined;
+  @State() streamDims:
+    | {
+        audio: boolean;
+        video: {
+          width: {
+            ideal: number;
+          };
+          height: {
+            ideal: number;
+          };
+        };
+      }
+    | undefined = undefined;
   @State() streamDataIsReady: boolean = false;
   @State() sendPhotoErrorName: string | undefined = undefined;
 
@@ -97,7 +120,8 @@ export class RootComponent {
 
   constructor() {
     (async () => {
-      this.streamDims = await getMaxVideoMediaDimensions({ ideal: 1080, aspectRatio: 6 / 4 });
+      // this.streamDims = await getMaxVideoMediaDimensions({ ideal: 1080, aspectRatio: 6 / 4 });
+      this.streamDims = await getMaxVideoMediaDimensions();
 
       window.streamData = await getStreamData(this.streamDims);
       this.streamDataIsReady = true;
@@ -112,8 +136,12 @@ export class RootComponent {
         {this.screenStatus === 'edit_settings_screen' && <edit-settings-screen />}
         {this.screenStatus === 'control_panel_screen' && <control-panel-screen />}
         {this.screenStatus === 'start_guestbook_screen' && !this.streamDataIsReady && <loading-guestbook-screen />}
-        {this.screenStatus === 'start_guestbook_screen' && this.streamDataIsReady && <start-guestbook-screen width={this.streamDims?.width} height={this.streamDims?.height} />}
-        {this.screenStatus === 'capture_countdown_screen' && <capture-countdown-screen width={this.streamDims?.width} height={this.streamDims?.height} />}
+        {this.screenStatus === 'start_guestbook_screen' && this.streamDataIsReady && (
+          <start-guestbook-screen width={this.streamDims?.video?.width?.ideal} height={this.streamDims?.video?.height?.ideal} />
+        )}
+        {this.screenStatus === 'capture_countdown_screen' && (
+          <capture-countdown-screen width={this.streamDims?.video?.width?.ideal} height={this.streamDims?.video?.height?.ideal} />
+        )}
         {this.screenStatus === 'print_photo_success_screen' && <print-photo-success-screen />}
         {this.screenStatus === 'print_photo_fail_screen' && <print-photo-fail-screen error={this.sendPhotoErrorName} />}
       </div>
